@@ -1,47 +1,27 @@
-obj-y += basic.o
-TGT:=basic
+#all: kernel.img
+all: build flash.cfi
+clean:
 
-CROSS_COMPILE:=aarch64-linux-gnu-
-AS       := $(CROSS_COMPILE)as
-LD       := $(CROSS_COMPILE)ld
-CC       := $(CROSS_COMPILE)gcc
-CPP      := $(CROSS_COMPILE)gcc -E
-CXX      := $(CROSS_COMPILE)g++
-AR       := $(CROSS_COMPILE)ar
-RANLIB   := $(CROSS_COMPILE)ranlib
-NM       := $(CROSS_COMPILE)nm
-STRIP    := $(CROSS_COMPILE)strip
-OBJCOPY  := $(CROSS_COMPILE)objcopy
-OBJDUMP  := $(CROSS_COMPILE)objdump
+subdirs := kernel userspace
+#userspace kernel
+
+include base.mk
+#include config.mk
+
+$(foreach dir,$(subdirs),$(eval $(call add_subdir,$(dir))))
+
+#LDFLAGS := -nostdlib -nostartfiles -fno-builtin -T image.lds -mcpu=cortex-a57 -O0 -fPIC
+
+#kernel.img: userspace-build kernel-build
+	#$(CC) $(LDFLAGS) kernel/kernel.a userspace/test.o -o $@
 
 
-CFLAGS := -Wall -g -ggdb -nostdinc -fno-builtin
-CPPFLAGS := $(CFLAGS)
-LDFLAGS := -nostdlib -nostartfiles -fno-builtin -T image.lds
-LIBS :=  -g -ggdb
-ASFLAGS := -D__ASSEMBLY__
-DEPFLAGS = -MMD -MF $(@F).d
+flash.img: userspace-build
+	cp -f userspace/test.bin flash.img
 
-OBJS:=$(obj-y)
-
-DEPS := $(addsuffix .d, $(OBJS))
-
-all: $(TGT)
-
-$(TGT): $(OBJS) image.lds
-	$(CC) $(LDFLAGS) $(OBJS) $(LIBS) -o $(TGT)
-
-%.o: %.c Makefile
-	$(CC) $(DEPFLAGS) $(CFLAGS) -o $@ -c $<
-
-%.o: %.cpp Makefile
-	$(CXX) $(DEPFLAGS) $(CPPFLAGS) -o $@ -c $<
-
-%.o: %.S Makefile
-	$(CC) $(DEPFLAGS) $(ASFLAGS) -o $@ -c $<
+flash.cfi: flash.img
+	cp -f $^ $@
+	truncate -s 64M $@
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TGT)
-
--include $(DEPS)
-
+	rm -f flash.cfi flash.img
