@@ -1,6 +1,11 @@
 // Entry point
 .global _start
 _start:
+// write task # to task
+adr x1, ex
+add x0, x0, #'0'
+strb w0, [x1, #28] // store byte
+// print it
 adr x0, ex
 mov x29, #55
 svc #0 // print
@@ -38,4 +43,4 @@ mov x2, #0
 	svc #42
 	b .
 
-ex: .asciz "Hello from userspace.\n"
+ex: .asciz "Hello from userspace @ Task #.\n"
