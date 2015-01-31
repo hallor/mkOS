@@ -49,6 +49,7 @@ bl task_create
 
 // start userspace
 ldr x0, =user2
+bl puts
 el0_context_restore_and_eret
 
 // kernel finalized
