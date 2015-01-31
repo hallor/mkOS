@@ -6,6 +6,8 @@ typedef void (*sys_handler_t)(struct task *);
 static void sys_print(struct task * task)
 {
     puts("sys_print()\n");
+    putreg("string:", task->ctx.gpr[0]);
+    puts((char*)task->ctx.gpr[0]);
 }
 
 static void sys_exit(struct task * task)

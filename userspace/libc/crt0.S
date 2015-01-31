@@ -2,8 +2,7 @@
 .global _start
 _start:
 // Get stack pointer address
-mov x0, #0x42
-ldr x1, =ex
+ldr x0, =ex
 mov x29, #55
 svc #0
 svc #1
