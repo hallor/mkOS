@@ -1,5 +1,6 @@
 #ifndef KERN_CONSOLE_H
 #define KERN_CONSOLE_H
+#include <stdint.h>
 
 void putc(int c);
 int getc(void);

@@ -20,6 +20,8 @@ struct task {
     struct cpu_ctx ctx; // must be first (for now)
     char name[16];
     enum task_state state;
+    void * vma_addr;
+    unsigned vma_size;
 };
 
 extern struct task * current;

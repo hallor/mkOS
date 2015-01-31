@@ -29,3 +29,5 @@ test.txt
 kernel/syscalls.c
 kernel/include/task.h
 kernel/task.c
+kernel/page.c
+kernel/include/page.h

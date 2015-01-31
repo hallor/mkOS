@@ -1,7 +1,7 @@
 // Entry point
 .global _start
 _start:
-ldr x0, =ex
+adr x0, ex
 mov x29, #55
 svc #0 // print
 svc #2 // yield

@@ -66,7 +66,7 @@ void bad_sync_from_el0(uint64_t esr)
 
     if (ec == 0x15) {// SVC from aa64
         int imm = esr & 0x1FFFFFF; // imm
-        puts("SVC\n");
+        puts("SVC @ PC "); puthex(current->ctx.pc); puts(" current "); puts(current->name); puts("\n");
         do_syscall(imm, current);
     } else {
         int i;
@@ -170,20 +170,9 @@ void memcpy(void * dest, void * src, unsigned cnt)
 	}
 }
 
-void load_app(void)
-{
-	volatile char * flash_base = (void*)0x08000000;
-	char * ram_dest = (void*)0x80100000;
-	unsigned ram_len = 1024;
-	memcpy(ram_dest, flash_base, ram_len);
-}
-
-
 void el1_init(void)
 {
 	puts("Kernel initialization...\n");
-	puts("Loading app...");
-	load_app();
 	puts("Done.\n");
 }
 
