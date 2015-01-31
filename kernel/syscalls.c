@@ -12,13 +12,21 @@ static void sys_print(struct task * task)
 
 static void sys_exit(struct task * task)
 {
+
     puts("sys_exit()\n");
     while(1) {}
+}
+
+static void sys_yield(struct task * task)
+{
+    puts("sys_yield()\n");
+    task_next();
 }
 
 sys_handler_t syscall_handlers[] = {
     sys_print,
     sys_exit,
+    sys_yield,
 };
 
 

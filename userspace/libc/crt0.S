@@ -1,11 +1,12 @@
 // Entry point
 .global _start
 _start:
-// Get stack pointer address
 ldr x0, =ex
 mov x29, #55
-svc #0
-svc #1
+svc #0 // print
+svc #2 // yield
+svc #1 // quit
+
 b .
 mov sp, x0
 

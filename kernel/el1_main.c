@@ -2,10 +2,6 @@
 #include "kern_console.h"
 #include "include/task.h"
 
-struct task tasks[2];
-
-struct task *current = &tasks[0];
-
 void translate_exception_syndrome(uint64_t esr)
 {
 	int ec = esr >> 26;

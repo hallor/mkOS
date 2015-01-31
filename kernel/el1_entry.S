@@ -1,3 +1,5 @@
+#include "include/asm.h"
+
 .global el1_start
 el1_start:
 // setup stack pointer for kernel
@@ -41,26 +43,13 @@ bl puts
 bl el1_init
 
 // initialize userspace
-
-// start userspace
 ldr x0, =user
 bl puts
+bl task_create
 
-
-.global ctx_switch
-ctx_switch:
-ldr x0,=0x80100028 // setup LR to entry point
-msr ELR_EL1, x0
-
-ldr x0, =_user_stack_top // setup EL0 SP
-msr SP_EL0, x0
-
-mov x0, #0x3C0 // setup EL0 SPSR
-msr SPSR_EL1, x0
+// start userspace
 ldr x0, =user2
-bl puts
-eret // Launch userspace
-
+el0_context_restore_and_eret
 
 // kernel finalized
 ldr x0, =end
@@ -71,7 +60,7 @@ b 1b
 
 welcome: .asciz "mkOS 1.0\n"
 init: .asciz "start kernel...\n"
-user: .asciz "start userspace...\n"
+user: .asciz "init userspace...\n"
 user2: .asciz "branch userspace...\n"
 end: .asciz "kernel stopped\n"
 cell: .asciz "CurrentEL"

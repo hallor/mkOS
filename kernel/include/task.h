@@ -17,4 +17,6 @@ struct task {
 
 extern struct task * current;
 
+void task_create(void);
+void task_next(void);
 #endif // TASK_H

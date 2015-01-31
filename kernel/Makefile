@@ -8,7 +8,7 @@ build: kernel.elf
 
 
 subdirs := drivers
-objs:= el1_entry.o el1_main.o el1_vector.o kern_console.o syscalls.o
+objs:= el1_entry.o el1_main.o el1_vector.o kern_console.o task.o syscalls.o
 
 define add_files
 obj-y:=
