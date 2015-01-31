@@ -1,15 +1,10 @@
 #include <stdint.h>
 #include "kern_console.h"
+#include "include/task.h"
 
-static struct cpu_ctx {
-    uint64_t gpr[30];
-    uint64_t lr;
-	uint64_t sp;
-	uint64_t spsr;
-	uint64_t pc; // ELR_el1
-} task_ctx;
+struct task tasks[2];
 
-struct cpu_ctx *current = &task_ctx;
+struct task *current = &tasks[0];
 
 void translate_exception_syndrome(uint64_t esr)
 {
@@ -68,22 +63,31 @@ void translate_exception_syndrome(uint64_t esr)
 	putreg("ISS", iss);
 }
 
+void do_syscall(int no, struct task *task);
 void bad_sync_from_el0(uint64_t esr)
 {
-	int i;
-	puts("Exception: ");
-	puts(__FUNCTION__);
-	puts("\n");
-	putreg("ESR: ", esr);
-	translate_exception_syndrome(esr);
+    int ec = esr >> 26;
 
-    puts("Task:\n");
-    putreg("ELR: ", current->lr);
-    putreg("CPSR: ", current->spsr);
-    putreg("SP:", current->sp);
-    putreg("PC:", current->pc);
-    for (i=0; i<30; ++i)
-		putreg("REG:", current->gpr[i]);
+    if (ec == 0x15) {// SVC from aa64
+        int imm = esr & 0x1FFFFFF; // imm
+        puts("SVC\n");
+        do_syscall(imm, current);
+    } else {
+        int i;
+        puts("Exception: ");
+        puts(__FUNCTION__);
+        puts("\n");
+        putreg("ESR: ", esr);
+        translate_exception_syndrome(esr);
+
+        puts("Task:\n");
+        putreg("ELR: ", current->ctx.lr);
+        putreg("CPSR: ", current->ctx.spsr);
+        putreg("SP:", current->ctx.sp);
+        putreg("PC:", current->ctx.pc);
+        for (i=0; i<30; ++i)
+            putreg("REG:", current->ctx.gpr[i]);
+    }
     puts("rfe\n");
 }
 

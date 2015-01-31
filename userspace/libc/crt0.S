@@ -3,10 +3,10 @@
 _start:
 // Get stack pointer address
 mov x0, #0x42
-mov x1, #42
+ldr x1, =ex
 mov x29, #55
-svc #2
-svc #3
+svc #0
+svc #1
 b .
 mov sp, x0
 
