@@ -1,30 +1,23 @@
 #include "task.h"
-#include "kern_console.h"
+#include "printk.h"
 typedef void (*sys_handler_t)(struct task *);
 
 
 static void sys_print(struct task * task)
 {
-    puts("sys_print("); puthex(task->ctx.gpr[0]); puts(") @ ");
-    puts(task->name);
-    puts("\n");
+    dbg("(%s:%d) sys_print(0x%p)\n", task->name, task->tid, task->ctx.gpr[0]);
     puts((char*)task->ctx.gpr[0]);
 }
 
 static void sys_yield(struct task * task)
 {
-    puts("sys_yield() @ ");
-    puts(task->name);
-    puts("\n");
+    dbg("(%s:%d) sys_yield()\n", task->name, task->tid);
     task_next();
 }
 
 static void sys_exit(struct task * task)
 {
-
-    puts("sys_exit() @ ");
-    puts(task->name);
-    puts("\n");
+    dbg("(%s:%d) sys_exit()\n", task->name, task->tid);
     task->state = TASK_DEAD;
     task_next(); // switch to next task
 }
@@ -39,7 +32,7 @@ sys_handler_t syscall_handlers[] = {
 void do_syscall(int no, struct task *task)
 {
     if (no > (sizeof(syscall_handlers) / sizeof(sys_handler_t))) {
-        puts("Unknown syscall requested.\n");
+        err("Unknown syscall requested: %d.\n", no);
         return;
     }
 
