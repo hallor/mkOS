@@ -1,3 +1,8 @@
 *.o
 *.o.d
 *.elf
+*.user
+*.cfi
+*.img
+*.app
+*.bin
