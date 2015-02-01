@@ -15,4 +15,4 @@ OBJDUMP  := $(CROSS_COMPILE)objdump
 ASFLAGS := -D__ASSEMBLY__ -mcpu=cortex-a57
 CFLAGS := -Wall -g -ggdb -fno-builtin -mcpu=cortex-a57 -O0 -fPIC
 LDFLAGS := -nostdlib -nostartfiles -fno-builtin -mcpu=cortex-a57 -O0 -fPIC -g -ggdb
-DEPFLAGS = -MMD -MF $(@F).d
+DEPFLAGS = -MMD -MF $@.d

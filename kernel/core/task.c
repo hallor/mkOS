@@ -2,7 +2,7 @@
 #include "include/page.h"
 #include "kern_console.h"
 
-#define MAX_TASKS 5
+#define MAX_TASKS 2
 struct task tasks[MAX_TASKS] = { {0, }, };
 
 struct task *current = &tasks[0];
