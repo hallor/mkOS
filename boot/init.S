@@ -1,65 +1,36 @@
+#include "config.h"
+#include "image.h"
+.macro puts string
+ldr x0,=\string
+bl uart_puts
+.endm
+
 .global start
 start:
-// setup stack pointer for kernel
+// setup stack pointer for bootloader
 ldr x0, =_stack_top
 mov sp, x0
 
-// zero bss
+// setup bss
 ldr x0, =_sbss
 ldr x1, =_ebss
 sub x2, x0, x1
 cbz x2, 2f
 mov x2, #0
-
 1:
-	cmp x1, x0
-	b.ge 2f
-	str x2, [x1], #8
-	b 1b
-
+    cmp x1, x0
+    b.ge 2f
+    str x2, [x1], #8
+    b 1b
 2:
-ldr x0, =welcome
-bl puts
 
-// initialize exception vector
-adr x0, el1_vector
-msr VBAR_EL1, x0
-// Configure state
-mrs x0, DAIF
-orr x0, x0, #0x3C0 // mask everything
+puts welcome
+bl main
+puts pre_panic
+puts panic
+b .
 
+welcome: .asciz "mkBOOT 1.0\n"
+pre_panic: .asciz "Error: main() finished!\n"
+panic: .asciz "BL panic!\n"
 
-// debug print
-ldr x0, =cell
-mrs x1, CurrentEL
-lsr x1, x1, #2
-bl putreg
-
-// initialize kernel
-ldr x0, =init
-bl puts
-bl el1_init
-
-// initialize userspace
-ldr x0, =user
-bl puts
-bl task_create
-
-// start userspace
-ldr x0, =user2
-bl puts
-el0_context_restore_and_eret
-
-// kernel finalized
-ldr x0, =end
-bl puts
-1:
-wfe
-b 1b
-
-welcome: .asciz "mkOS 1.0\n"
-init: .asciz "start kernel...\n"
-user: .asciz "init userspace...\n"
-user2: .asciz "branch userspace...\n"
-end: .asciz "kernel stopped\n"
-cell: .asciz "CurrentEL"

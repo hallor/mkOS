@@ -1,11 +1,10 @@
-#include "config.h"
 OUTPUT_FORMAT("elf64-littleaarch64", "elf64-littleaarch64", "elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
 ENTRY(start)
 
 MEMORY
 {
-    ram(rwx): ORIGIN = CONFIG_RAM_START + CONFIG_RAM_SIZE/2, LENGTH = CONFIG_RAM_SIZE/2
+    ram(rwx): ORIGIN = 0x80000000 + 33554432, LENGTH = 33554432
 }
 
 ram_top = ORIGIN(ram) + LENGTH(ram);

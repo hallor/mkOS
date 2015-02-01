@@ -42,3 +42,5 @@ config.mk
 debug.sh
 Makefile
 run.sh
+boot/image.h
+boot/main.c

@@ -7,7 +7,8 @@ include ../build.mk
 build: boot.elf
 
 
-objs:= init.o uart.o
+objs:= init.o uart.o main.o
+DEPS := $(addsuffix .d, $(objs))
 
 clean:
 	rm -f $(objs) $(DEPS) kernel.elf

@@ -27,5 +27,14 @@ ret
 
 // void uart_puts (char*)
 .global uart_puts
-
+uart_puts:
+str x30, [sp, #-8]!
+mov x20, x0
+1:
+    ldrb w0, [x20], #0x1
+    cbz w0, 2f
+    bl uart_put
+    b 1b
+2:
+ldr x30, [sp], #8
 ret
