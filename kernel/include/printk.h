@@ -1,6 +1,7 @@
 #ifndef PRINTK_H
 #define PRINTK_H
 int printk(const char *format, ...);
+void puts(const char * s);
 
 #define __sys_msg(CO, CL, X,...) printk(CO"[$][%s] %s:%d "X"\e[37;40;0m", CL, __THIS_FILE__, __LINE__,##__VA_ARGS__)
 

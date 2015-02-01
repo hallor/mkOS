@@ -63,3 +63,5 @@ kernel/lib/strlen.c
 kernel/lib_3rdparty/ctype.c
 kernel/lib/printk.c
 kernel/include/printk.h
+kernel/lib_3rdparty/div64.h
+kernel/lib_3rdparty/div64.c

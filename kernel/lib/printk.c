@@ -12,6 +12,7 @@ int printk(const char *format, ...)
     int len;
 
     printf_buf[0] = 0;
+    printf_buf[CONFIG_PRINTK_BUFFER_LEN - 1] = 0;
 
     va_start(ap, format);
     len =  vsnprintf(printf_buf, CONFIG_PRINTK_BUFFER_LEN - 1, format, ap);

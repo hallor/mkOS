@@ -1,6 +1,6 @@
 #include "task.h"
 #include "page.h"
-#include "kern_console.h"
+#include "printk.h"
 #include "util.h"
 #include "vfs.h"
 #include "u-boot-image.h"
@@ -21,12 +21,9 @@ void task_next()
     }
 
     if (current->state != TASK_ACTIVE) {
-        puts("Kernel panic - no more tasks are active.\n");
-        while (1) {};
+        panic("No more tasks are active.\n");
     }
-    puts("task_next()->");
-    puts(current->name);
-    puts("\n");
+    dbg("context switch to %s\n", current->name);
 }
 
 struct task * find_free_task()
@@ -43,8 +40,9 @@ struct task * find_free_task()
 static void task_load(const char *name)
 {
     int fd = vfs_open(name);
+    dbg("Loading task: %s\n", name);
     if (fd < 0) {
-        puts("Failed to open task"); puts(name); puts("\n");
+        err("Failed to open task %s\n", name);
         return;
     }
 
@@ -52,21 +50,20 @@ static void task_load(const char *name)
     int ret = vfs_read(fd, &hdr, sizeof(image_header_t));
 
     if (ret != sizeof(image_header_t)) {
-        puts("Failed to read task header\n");
+        err("Failed to read task header\n");
         vfs_close(fd);
         return;
     }
 
-    puts("Loading executable:"); puts(hdr.ih_name); puts("\n");
 
     struct task * task = find_free_task();
     if (!task) {
-        puts("No more free tasks\n");
+        err("No more free tasks\n");
         vfs_close(fd);
         return;
     }
 
-    memcpy(task->name, hdr.ih_name, CONFIG_MAX_FILE_NAME);
+    memcpy(task->name, hdr.ih_name, CONFIG_MAX_FILE_NAME); // todo: strncpy
     task->vma_size = ntohl(hdr.ih_size);
     task->vma_addr = kmalloc(task->vma_size);
     task->ctx.gpr[0] = task->tid;
@@ -77,16 +74,13 @@ static void task_load(const char *name)
 
     ret = vfs_read(fd, task->vma_addr, task->vma_size);
     if (ret != task->vma_size) {
-        puts("Failed to read executable. Task invalid.\n");
+        err("Failed to read executable. Task %s is invalid.\n", task->name);
         return;
     }
 
     task->state = TASK_ACTIVE;
-    puts("created task "); puts(task->name); putreg(" tid", task->tid);
-    putreg("vma", task->vma_addr);
-    putreg("pc", task->ctx.pc);
-    putreg("sp", task->ctx.sp);
-
+    info("Created task '%s' with tid %d. VMA: 0x%08x pc = 0x%08x sp = 0x%08x\n",
+         task->name, task->tid, task->vma_addr, task->ctx.pc, task->ctx.sp);
     vfs_close(fd);
 
     if (!current)
@@ -96,7 +90,7 @@ static void task_load(const char *name)
 void task_create()
 {
     int i;
-    puts("Creating tasks...\n");
+    info("Creating tasks...\n");
     for (i=0; i<MAX_TASKS; ++i) {
         tasks[i].tid = i;
         tasks[i].state = TASK_INVALID;

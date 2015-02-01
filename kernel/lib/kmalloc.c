@@ -1,6 +1,6 @@
 #include "kmalloc.h"
 #include "page.h"
-#include "kern_console.h"
+#include "printk.h"
 
 // align do 16 bytes
 #define ALIGN_UP(X) ((X + 0xF) & ~0xF)
@@ -16,10 +16,10 @@ static struct memchunk * mem = 0;
 
 void kmalloc_init()
 {
-    puts("kmalloc_init()\n");
+    info("Initializing kernel malloc pool...\n");
     mem = page_alloc(4);
     if (!mem)
-        puts("kmalloc_init failed\n");
+        panic("failed to allocate kernel malloc pool.\n");
     mem->next = 0;
     mem->total_size = 4 << PAGE_SHIFT;
     mem->offset = 0;
@@ -40,10 +40,10 @@ void * kmalloc(unsigned size)
         mem_last = m;
         m = m->next;
     }
-    puts("kmalloc: did not found free mem chunk, allocating new one\n");
+    dbg("did not found free mem chunk, allocating new one\n");
     m = page_alloc( ALIGN_PGUP(size + ALIGN_UP(sizeof(struct memchunk))) >> PAGE_SHIFT);
     if (!m) {
-        puts("kmalloc: out of memory\n");
+        err("out of memory\n");
         return 0;
     }
     mem_last->next = m;
@@ -58,5 +58,5 @@ void * kmalloc(unsigned size)
 
 void kfree(void * d)
 {
-    puts("kfree not implemented.\n");
+    wrn("kfree not implemented.\n");
 }

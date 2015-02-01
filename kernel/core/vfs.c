@@ -1,6 +1,6 @@
 #include "vfs.h"
 #include "kmalloc.h"
-#include "kern_console.h"
+#include "printk.h"
 #include "u-boot-image.h"
 #include "util.h"
 
@@ -19,28 +19,28 @@ static void parse_flash(void * base, unsigned size)
     image_header_t * hdr = base;
 
     if (size < sizeof(image_header_t)) {
-        puts("Suprious bytes at the end of device");
+        wrn("Suprious bytes at the end of device");
         return;
     }
     if (vfs_next == CONFIG_MAX_FILES) {
-        puts("Too many files.\n");
+        err("Too many files.\n");
         return;
     }
 
     size -= sizeof(image_header_t);
     if (ntohl(hdr->ih_magic) == IH_MAGIC) {
-        putreg("Found image @", (unsigned)base);
-        puts("image-name: "); puts((char*)hdr->ih_name); putreg(" image-size", ntohl(hdr->ih_size));
+        dbg("Found file header @ 0x%08x\n", base);
+        dbg("image-name: %s image-size: %d\n", hdr->ih_name, ntohl(hdr->ih_size));
         if (hdr->ih_arch != IH_ARCH_ARM64) {
-            puts("Invalid image architecture!\n");
+            wrn("Invalid image architecture!\n");
             return;
         }
         if (hdr->ih_comp != IH_COMP_NONE) {
-            puts("Image compression not supported!\n");
+            wrn("Image compression not supported!\n");
             return;
         }
         if (ntohl(hdr->ih_size) > size) {
-            puts("Image too large!\n");
+            wrn("Image too large!\n");
             return;
         }
         memcpy(vfs[vfs_next].name, hdr->ih_name, CONFIG_MAX_FILE_NAME); // TODO: strncpy
@@ -54,7 +54,7 @@ static void parse_flash(void * base, unsigned size)
 
         parse_flash(base, size);
     } else {
-        puts("No magic found - aborting.\n");
+        dbg("No more magic found.\n");
     }
 }
 
@@ -70,18 +70,16 @@ unsigned fds_max = 100;
 
 int vfs_init(void)
 {
-    puts("Initializing vfs...\n");
+    info("Initializing pseudo-vfs...\n");
     vfs = kmalloc(CONFIG_MAX_FILES * sizeof(struct inode));
     if (!vfs) {
-        puts("vfs init failed.\n");
-        return -1;
+        panic("vfs init failed.\n");
     }
     vfs_next = 0;
 
     fds = kmalloc(sizeof(struct file_descriptor) * fds_max);
     if (!fds) {
-        puts("fds init failed.\n");
-        return -1;
+        panic("fds init failed.\n");
     }
     fds_next = 0;
     memset(fds, 0, sizeof(struct file_descriptor) * fds_max);
@@ -146,12 +144,13 @@ int vfs_read(int fd, void * buf, unsigned size)
 
     memcpy(buf, i->file->blob_start + i->offset, size);
     i->offset += size;
-    putreg("vfs - bytes read", size);
+    dbg("read %d bytes.\n", size);
     return size;
 }
 
 int vfs_write(int fd, void * buf, unsigned count)
 {
+    wrn("Not supported.\n");
     return -1;
 }
 

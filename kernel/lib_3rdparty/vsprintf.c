@@ -17,6 +17,7 @@
 #include <limits.h>
 #include "ctype.h"
 #include "util.h"
+#include "div64.h"
 
 #define noinline __attribute__((noinline))
 
@@ -267,7 +268,7 @@ static noinline char *put_dec(char *buf, uint64_t num)
 		unsigned rem;
 		if (num < 100000)
 			return put_dec_trunc(buf, num);
-        rem = 0;//(num / 100000);
+        rem = do_div(num, 100000);
 		buf = put_dec_full(buf, rem);
 	}
 }

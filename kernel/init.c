@@ -22,12 +22,9 @@
 
 void init_kernel(void)
 {
-    dbg("Initializing kernel\n");
+    info("Initializing kernel...\n");
     page_init();
     kmalloc_init();
-    printk("allocate 0x%x\n", kmalloc(30));
-    printk("allocate 0x%x\n", kmalloc(30));
-    printk("allocate 0x%x\n", kmalloc(20000));
     vfs_init();
     task_create();
 }
