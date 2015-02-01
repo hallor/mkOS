@@ -55,3 +55,5 @@ kernel/lib/memset.c
 kernel/lib/kmalloc.c
 kernel/include/kmalloc.h
 kernel/lib/ntohl.c
+kernel/lib/memcmp.c
+kernel/lib/strncmp.c

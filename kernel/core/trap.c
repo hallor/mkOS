@@ -83,6 +83,8 @@ void bad_sync_from_el0(uint64_t esr)
         putreg("PC:", current->ctx.pc);
         for (i=0; i<30; ++i)
             putreg("REG:", current->ctx.gpr[i]);
+        puts("Panic.\n");
+        while(1) {}
     }
     puts("rfe\n");
 }

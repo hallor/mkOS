@@ -23,36 +23,24 @@ mov x2, #0
 ldr x0, =welcome
 bl puts
 
+// Check, if we're in supervisor mode
+mov x0, #1
+mrs x1, CurrentEL
+lsr x1, x1, #2
+sub x0, x0, x1
+cbnz x0, panic_mode
 
 // initialize exception vector
 adr x0, exception_vector
 msr VBAR_EL1, x0
-
-// Configure state
-//mrs x0, DAIF
-//orr x0, x0, #0x3C0 // mask everything
-
-
-// debug print
-ldr x0, =cell
-mrs x1, CurrentEL
-lsr x1, x1, #2
-bl putreg
 
 // initialize kernel
 ldr x0, =init
 bl puts
 bl init_kernel
 
-b .
-
-// initialize userspace
-ldr x0, =user
-bl puts
-bl task_create
-
 // start userspace
-ldr x0, =user2
+ldr x0, =user
 bl puts
 el0_context_restore_and_eret
 
@@ -63,9 +51,15 @@ bl puts
 wfe
 b 1b
 
+panic_mode:
+	ldr x0, =notsvc
+	mrs x1, CurrentEL
+	lsr x1, x1, #2
+	bl putreg
+	b .
+
 welcome: .asciz "mkOS 1.0\n"
+notsvc: .asciz "Panic: CPU not running in EL1 mode. CurrentEL"
 init: .asciz "start kernel...\n"
-user: .asciz "init userspace...\n"
-user2: .asciz "branch userspace...\n"
+user: .asciz "resume userspace...\n"
 end: .asciz "kernel stopped\n"
-cell: .asciz "CurrentEL"

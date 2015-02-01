@@ -28,5 +28,7 @@ void init_kernel(void)
     putreg("allocate", kmalloc(30));
     putreg("allocate", kmalloc(20000));
     vfs_init();
+
+    task_create();
 }
 
