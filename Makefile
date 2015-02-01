@@ -16,10 +16,10 @@ $(foreach dir,$(subdirs),$(eval $(call add_subdir,$(dir))))
 	#$(CC) $(LDFLAGS) kernel/kernel.a userspace/test.o -o $@
 
 kernel/kernel.img: kernel-build
-userspace/test.bin: userspace-build
+userspace/test.img: userspace-build
 
-flash.img: kernel/kernel.img userspace/test.bin
-	cat kernel/kernel.img userspace/test.bin > flash.img
+flash.img: kernel/kernel.img userspace/test.img
+	cat $^ > $@
 
 flash.cfi: flash.img
 	cp -f $^ $@

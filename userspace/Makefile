@@ -4,10 +4,10 @@ CFLAGS := $(CFLAGS) -Iinclude
 LDFLAGS := $(LDFLAGS) -T app.lds
 include ../build.mk
 
-build: test.bin
+build: test.img
 
 clean:
-	rm -f $(objs) $(DEPS) test.app test.bin
+	rm -f $(objs) $(DEPS) test.app test.bin test.img
 
 subdirs := libc app1
 
@@ -26,5 +26,6 @@ test.app: $(objs)
 test.bin: test.app
 	$(OBJCOPY) -O binary test.app test.bin
 
-test.o: test.bin
-	$(OBJCOPY) -I binary -O elf64-little --binary-architecture aarch64 $^ $@
+get_entry= $(shell readelf -h test.app  | grep "Entry point address:" | tr -s " " | cut -d " " -f 5)
+test.img: test.bin test.app
+	mkimage -A arm64 -O u-boot -T standalone -C none -a 0x80100000 -e $(get_entry) -n "test-app" -d test.bin $@
