@@ -4,7 +4,7 @@ CFLAGS := $(CFLAGS) -I$(CURDIR)/include -D__KERNEL__
 LDFLAGS := $(LDFLAGS) -T kernel.lds
 include ../build.mk
 
-build: kernel.elf
+build: kernel.img
 
 
 subdirs := core drivers lib lib_3rdparty
@@ -23,7 +23,14 @@ endef
 $(foreach dir,$(subdirs),$(eval $(call add_files,$(dir))))
 
 clean:
-	rm -f $(objs) $(DEPS) kernel.elf
+	rm -f $(objs) $(DEPS) kernel.elf kernel.img kernel.bin
+
+get_entry= $(shell readelf -h kernel.elf  | grep "Entry point address:" | tr -s " " | cut -d " " -f 5)
+kernel.img: kernel.bin kernel.elf
+	mkimage -A arm64 -O u-boot -T kernel -C none -a 0x80000000 -e $(get_entry) -n "mkOS-kernel" -d kernel.bin $@
+
+kernel.bin: kernel.elf
+	$(OBJCOPY) -O binary $< $@
 
 kernel.elf : $(objs)
 	$(CC) $(LDFLAGS) -o $@ $^

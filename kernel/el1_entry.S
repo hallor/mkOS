@@ -23,6 +23,8 @@ mov x2, #0
 ldr x0, =welcome
 bl puts
 
+b .
+
 // initialize exception vector
 adr x0, el1_vector
 msr VBAR_EL1, x0

@@ -4,7 +4,6 @@ ENTRY(el1_start)
 
 MEMORY
 {
-	rom(rx): ORIGIN = 0x00000000, LENGTH = 1M
 	ram(rwx): ORIGIN = 0x80000000, LENGTH = 16M
 }
 
