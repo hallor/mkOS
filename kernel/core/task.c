@@ -79,7 +79,7 @@ static void task_load(const char *name)
     }
 
     task->state = TASK_ACTIVE;
-    info("Created task '%s' with tid %d. VMA: 0x%08x pc = 0x%08x sp = 0x%08x\n",
+    info("Created task '%s' with tid %d. VMA: %#llx pc = %#llx sp = %#llx\n",
          task->name, task->tid, task->vma_addr, task->ctx.pc, task->ctx.sp);
     vfs_close(fd);
 

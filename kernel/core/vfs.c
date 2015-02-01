@@ -29,7 +29,7 @@ static void parse_flash(void * base, unsigned size)
 
     size -= sizeof(image_header_t);
     if (ntohl(hdr->ih_magic) == IH_MAGIC) {
-        dbg("Found file header @ 0x%08x\n", base);
+        dbg("Found file header @ %#llx\n", base);
         dbg("image-name: %s image-size: %d\n", hdr->ih_name, ntohl(hdr->ih_size));
         if (hdr->ih_arch != IH_ARCH_ARM64) {
             wrn("Invalid image architecture!\n");

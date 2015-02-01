@@ -75,26 +75,29 @@ exception_params
 	SynchronousException_lowerEL_AA64:
 	el0_context_store
 	exception_params
-	bl bad_sync_from_el0
+	bl trap_sync_from_el0
     el0_context_restore_and_eret
 
 .align  7
 Irq_lowerEL_AA64:
+	el0_context_store
 	exception_params
-	bl bad_irq
-	eret
+	bl trap_irq_from_el0
+	el0_context_restore_and_eret
 
 .align  7
 Fiq_lowerEL_AA64:
+	el0_context_store
 	exception_params
-	bl bad_fiq
-	eret
+	bl trap_fiq_from_el0
+	el0_context_restore_and_eret
 
 .align  7
 SError_lowerEL_AA64:
+	el0_context_store
 	exception_params
-	bl bad_error
-	eret
+	bl trap_serror_from_el0
+	el0_context_restore_and_eret
 
 // Vectors 0x600 - 0x780 -> from lower EL in AA32
 .align  7

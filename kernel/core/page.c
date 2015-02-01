@@ -13,7 +13,7 @@ int page_init(void)
     int free_ram = CONFIG_RAM_SIZE - ((void*)_heap_start - (void*)CONFIG_RAM_START);
 
     info("Initializing page allocator...\n");
-    dbg("Heap start: 0x%08x size: %d\n", _heap_start, free_ram);
+    dbg("Heap start: %#llx size: %d\n", _heap_start, free_ram);
     page_allocation_bitmap_size = free_ram >> PAGE_SHIFT; //# of entries for page bitmap
     page_allocation_bitmap = _heap_start;
     memset(page_allocation_bitmap, 0, page_allocation_bitmap_size);

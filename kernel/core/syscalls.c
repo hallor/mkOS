@@ -5,7 +5,7 @@ typedef void (*sys_handler_t)(struct task *);
 
 static void sys_print(struct task * task)
 {
-    dbg("(%s:%d) sys_print(0x%p)\n", task->name, task->tid, task->ctx.gpr[0]);
+    dbg("(%s:%d) sys_print(%#llx)\n", task->name, task->tid, task->ctx.gpr[0]);
     puts((char*)task->ctx.gpr[0]);
 }
 
