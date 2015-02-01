@@ -1,5 +1,5 @@
-#include "include/task.h"
-#include "include/page.h"
+#include "task.h"
+#include "page.h"
 #include "kern_console.h"
 
 #define MAX_TASKS 2

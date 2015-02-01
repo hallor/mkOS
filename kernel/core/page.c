@@ -1,4 +1,4 @@
-#include "include/page.h"
+#include "page.h"
 #include "kern_console.h"
 //static void * ram_start = (void*)0x80100000;
 static int free_ram_size = 0x100000;

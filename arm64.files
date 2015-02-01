@@ -35,3 +35,4 @@ config.mk
 debug.sh
 Makefile
 run.sh
+kernel/include/config.h
