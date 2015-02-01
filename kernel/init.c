@@ -4,6 +4,7 @@
 #include "vfs.h"
 #include "page.h"
 #include "util.h"
+#include "kmalloc.h"
 
 /* Memory map:
  * VE_NORFLASH1
@@ -22,9 +23,10 @@ void init_kernel(void)
 {
     puts("Initializing kernel\n");
     page_init();
-    page_alloc(1);
-    page_alloc(4);
-    page_alloc(1);
+    kmalloc_init();
+    putreg("allocate", kmalloc(30));
+    putreg("allocate", kmalloc(30));
+    putreg("allocate", kmalloc(20000));
     vfs_init();
 }
 

@@ -52,3 +52,5 @@ kernel/include/util.h
 kernel/core/trap.c
 kernel/include/syscalls.h
 kernel/lib/memset.c
+kernel/lib/kmalloc.c
+kernel/include/kmalloc.h
