@@ -23,7 +23,7 @@ svc #2 // yield
 svc #1 // exit
 
 1:
-wfe
+wfi
 b 1b
 
 mov sp, x0

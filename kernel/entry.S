@@ -48,7 +48,7 @@ el0_context_restore_and_eret
 ldr x0, =end
 bl puts
 1:
-wfe
+wfi
 b 1b
 
 panic_mode:

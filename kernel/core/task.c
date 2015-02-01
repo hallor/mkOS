@@ -70,7 +70,7 @@ static void task_load(const char *name)
     task->vma_addr = kmalloc(task->vma_size);
     task->ctx.gpr[0] = task->tid;
     task->ctx.lr = 0x0;
-    task->ctx.sp = page_alloc(1); // one page for stack
+    task->ctx.sp = page_alloc(2); // two pages for stack
     task->ctx.spsr = 0x3C0; // User, AA64
     task->ctx.pc = task->vma_addr + ntohl(hdr.ih_ep) - ntohl(hdr.ih_load);
 

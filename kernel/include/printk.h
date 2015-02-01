@@ -13,7 +13,7 @@ void puts(const char * s);
 #define panic(X,...) do { \
     puts("\n\n\e[31;40;1m[PANIC]"__FILE__":"); puts(__FUNCTION__ ); \
     printk("():%d "X"\e[37;40;0m", __LINE__, ##__VA_ARGS__); \
-    while (1) { asm("wfe"); } \
+    while (1) { asm("wfi"); } \
     } while (0)
 
 #endif // PRINTK_H
