@@ -22,7 +22,7 @@
 
 void init_kernel(void)
 {
-    puts("Initializing kernel\n");
+    dbg("Initializing kernel\n");
     page_init();
     kmalloc_init();
     printk("allocate 0x%x\n", kmalloc(30));
