@@ -1,18 +1,24 @@
 #ifndef ASM_H
 #define ASM_H
-/*
- * This macro verifies that the a given vector doesn't exceed the
- * architectural limit of 32 instructions. This is meant to be placed
- * immedately after the last instruction in the vector. It takes the
- * vector entry as the parameter
- */
-#ifdef __ASSEMBLY__
-.macro check_vector_size since
-  .if (. - \since) > (32 * 4)
-    .error "Vector exceeds 32 instructions"
-  .endif
-.endm
 
+/*
+  Copyright (C) 2015 Mateusz Kulikowski <mateusz.kulikowski@gmail.com>
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifdef __ASSEMBLY__
 // Stores current context in current structure
 .macro el0_context_store
     ldr x9, =current // throw away x9
