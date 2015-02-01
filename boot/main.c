@@ -36,6 +36,21 @@ void memcpy(void * dest, const void * src, unsigned cnt)
     }
 }
 
+#define ___swab32(x) \
+        ((__u32)( \
+                (((__u32)(x) & (__u32)0x000000ffUL) << 24) | \
+                (((__u32)(x) & (__u32)0x0000ff00UL) <<  8) | \
+                (((__u32)(x) & (__u32)0x00ff0000UL) >>  8) | \
+                (((__u32)(x) & (__u32)0xff000000UL) >> 24) ))
+
+uint32_t ntohl(uint32_t d)
+{
+    return  ((d & 0x000000ffUL) << 24) |
+            ((d & 0x0000ff00UL) <<  8) |
+            ((d & 0x00ff0000UL) >>  8) |
+            ((d & 0xff000000UL) >> 24);
+}
+
 #define dbg(x) do { uart_puts("[D] "); uart_puts(x); } while (0)
 #define print(x) uart_puts(x)
 
@@ -43,7 +58,7 @@ void load_kernel(void * from)
 {
     const image_header_t * image = from;
     print("Loading kernel from "); puthex((uint64_t)from); print("\n");
-    if (image->ih_magic != IH_MAGIC) {
+    if (ntohl(image->ih_magic) != IH_MAGIC) {
         print("Invalid image magic! Expected: "); puthex(IH_MAGIC); print(" Got: "); puthex(image->ih_magic); print("\n");
         return;
     }
@@ -63,19 +78,19 @@ void load_kernel(void * from)
         print("Invalid image type\n");
         return;
     }
-    if (image->ih_load < CONFIG_RAM_START || image->ih_load >= CONFIG_RAM_START + CONFIG_RAM_SIZE/2 ) {
-        print("Image doesn't fit in RAM");
+    if (ntohl(image->ih_load) < CONFIG_RAM_START || ntohl(image->ih_load) >= CONFIG_RAM_START + CONFIG_RAM_SIZE/2 ) {
+        print("Image doesn't fit in RAM]n");
         return;
     }
-    if (image->ih_load + image->ih_size > CONFIG_RAM_START + CONFIG_RAM_SIZE/2) {
+    if (ntohl(image->ih_load) + ntohl(image->ih_size) > CONFIG_RAM_START + CONFIG_RAM_SIZE/2) {
         print("Image too large\n");
         return;
     }
     print("Loading image: "); print((char*)image->ih_name); print("\n");
-    print("To: "); puthex(image->ih_load); print(" Size: "); puthex(image->ih_size); print("\n");
-    memcpy((void*)image->ih_load, image + 1, image->ih_size);
-    print("Running image at "); puthex(image->ih_ep); print("\n");
-    asm ("blr %0\n" : : "r"(image->ih_ep));
+    print("To: "); puthex(ntohl(image->ih_load)); print(" Size: "); puthex(ntohl(image->ih_size)); print("\n");
+    memcpy((void*)ntohl(image->ih_load), image + 1, ntohl(image->ih_size));
+    print("Running image at "); puthex(ntohl(image->ih_ep)); print("\n");
+    asm ("blr %0\n" : : "r"(ntohl(image->ih_ep)));
     print("Panic: image returned to bootloader.\n");
 }
 
