@@ -1,3 +1,8 @@
+boot/boot.lds
+boot/config.h
+boot/init.S
+boot/Makefile
+boot/uart.S
 kernel/core/Makefile
 kernel/core/page.c
 kernel/core/syscalls.c
@@ -6,6 +11,7 @@ kernel/core/vma.c
 kernel/drivers/early_uart.S
 kernel/drivers/Makefile
 kernel/include/asm.h
+kernel/include/config.h
 kernel/include/cpu.h
 kernel/include/kern_console.h
 kernel/include/page.h
@@ -15,6 +21,7 @@ kernel/include/uart.h
 kernel/lib/kern_console.c
 kernel/lib/Makefile
 kernel/lib/printk.c
+kernel/lib_3rdparty/Makefile
 kernel/el1_entry.S
 kernel/el1_main.c
 kernel/el1_vector.S
@@ -35,4 +42,3 @@ config.mk
 debug.sh
 Makefile
 run.sh
-kernel/include/config.h

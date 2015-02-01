@@ -2,7 +2,7 @@
 all: build flash.cfi
 clean:
 
-subdirs := kernel userspace
+subdirs := boot kernel userspace
 #userspace kernel
 
 include base.mk

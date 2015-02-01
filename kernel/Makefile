@@ -7,7 +7,7 @@ include ../build.mk
 build: kernel.elf
 
 
-subdirs := core drivers lib
+subdirs := core drivers lib lib_3rdparty
 objs:= el1_entry.o el1_main.o el1_vector.o
 
 DEPS := $(addsuffix .d, $(objs))
