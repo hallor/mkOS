@@ -2,17 +2,30 @@
 .global _start
 _start:
 // write task # to task
+mov x28, x0 // save tid
 adr x1, ex
 add x0, x0, #'0'
 strb w0, [x1, #28] // store byte
+adr x1, ex2
+strb w0, [x1, #27] // store byte
+
 // print it
 adr x0, ex
-mov x29, #55
 svc #0 // print
 svc #2 // yield
-svc #1 // quit
+cbnz x28, 1f
+svc #2 // yield again for tid 0
+1:
+adr x0, ex2
+svc #0 // print
+svc #2 // yield
 
-b .
+svc #1 // exit
+
+1:
+wfe
+b 1b
+
 mov sp, x0
 
 mov x0, #1 // 1 == puts
@@ -44,3 +57,4 @@ mov x2, #0
 	b .
 
 ex: .asciz "Hello from userspace @ Task #.\n"
+ex2: .asciz "Bye from userspace @ Task #.\n"

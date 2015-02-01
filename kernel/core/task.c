@@ -7,23 +7,25 @@
 #include "kmalloc.h"
 
 #define MAX_TASKS 50
-static struct task tasks[MAX_TASKS] = { {0, }, };
+static struct task tasks[MAX_TASKS];
 
 struct task *current = 0;
 
 void task_next()
 {
     int i;
-    for (i=1; i<MAX_TASKS; ++i) {
-        if (tasks[(i + current->tid) % MAX_TASKS].state == TASK_ACTIVE) {
-            current = &tasks[(i + current->tid) % MAX_TASKS];
+
+    for (i=current->tid + 1; i<current->tid + 1 + MAX_TASKS; ++i) {
+        if (tasks[i % MAX_TASKS].state == TASK_ACTIVE) {
+            current = &tasks[i % MAX_TASKS];
+            break;
         }
     }
 
     if (current->state != TASK_ACTIVE) {
         panic("No more tasks are active.\n");
     }
-    dbg("context switch to %s\n", current->name);
+    dbg("context switch to %s tid %d\n", current->name, current->tid);
 }
 
 struct task * find_free_task()
@@ -95,7 +97,7 @@ void task_create()
         tasks[i].tid = i;
         tasks[i].state = TASK_INVALID;
     }
-    for (i=0; i<2; ++i) {
+    for (i=0; i<3; ++i) {
         task_load("test-app");
     }
 }
