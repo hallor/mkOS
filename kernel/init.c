@@ -5,6 +5,7 @@
 #include "page.h"
 #include "util.h"
 #include "kmalloc.h"
+#include "printk.h"
 
 /* Memory map:
  * VE_NORFLASH1
@@ -24,11 +25,10 @@ void init_kernel(void)
     puts("Initializing kernel\n");
     page_init();
     kmalloc_init();
-    putreg("allocate", kmalloc(30));
-    putreg("allocate", kmalloc(30));
-    putreg("allocate", kmalloc(20000));
+    printk("allocate 0x%x\n", kmalloc(30));
+    printk("allocate 0x%x\n", kmalloc(30));
+    printk("allocate 0x%x\n", kmalloc(20000));
     vfs_init();
-
     task_create();
 }
 

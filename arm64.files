@@ -57,3 +57,9 @@ kernel/include/kmalloc.h
 kernel/lib/ntohl.c
 kernel/lib/memcmp.c
 kernel/lib/strncmp.c
+kernel/lib_3rdparty/vsprintf.c
+kernel/lib_3rdparty/ctype.h
+kernel/lib/strlen.c
+kernel/lib_3rdparty/ctype.c
+kernel/lib/printk.c
+kernel/include/printk.h

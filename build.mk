@@ -1,8 +1,8 @@
 %.o: %.c
-	$(CC) $(DEPFLAGS) $(CFLAGS) -o $@ -c $<
+	$(CC) $(DEPFLAGS) $(CFLAGS) -D__THIS_FILE__='"$(<F)"' -o $@ -c $<
 
 %.o: %.cpp
-	$(CXX) $(DEPFLAGS) $(CPPFLAGS) -o $@ -c $<
+	$(CXX) $(DEPFLAGS) $(CPPFLAGS) -D__THIS_FILE__='"$(<F)"' -o $@ -c $<
 
 %.o: %.S
-	$(CC) $(DEPFLAGS) $(ASFLAGS) -o $@ -c $<
+	$(CC) $(DEPFLAGS) $(ASFLAGS) -D__THIS_FILE__='"$(<F)"' -o $@ -c $<

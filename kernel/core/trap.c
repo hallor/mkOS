@@ -121,10 +121,13 @@ void bad_error(uint64_t esr)
 }
 void do_sync(uint64_t esr)
 {
+    uint64_t pc;
     puts("Exception: ");
     puts(__FUNCTION__);
     puts("\n");
-    putreg("ESR: ", esr);
+    putreg("ESR", esr);
+    asm("mrs %0, ELR_EL1": "=r"(pc));
+    putreg("PC", pc);
     translate_exception_syndrome(esr);
 }
 void do_irq(uint64_t esr)

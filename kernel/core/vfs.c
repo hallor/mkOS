@@ -167,4 +167,5 @@ int vfs_stat(int fd, struct stat *stat)
     if (!i || !i->file || !stat)
         return -1;
     stat->size = i->file->blob_size;
+    return 0;
 }
