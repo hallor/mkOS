@@ -17,8 +17,8 @@
 .endm
 
 .section	.vectors, "ax"; .align 11
-.global el1_vector
-el1_vector:
+.global exception_vector
+exception_vector:
 
 // Vectors 0x0 - 0x180 -> from current EL with SP_EL0
 .align  7
@@ -125,6 +125,3 @@ SError_lowerEL_AA32:
 wfe
 b 1b
 
-
-ex: .asciz "Exception occured.\n"
-esr: .asciz "ESR"

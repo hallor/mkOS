@@ -1,7 +1,7 @@
 #include "include/asm.h"
 
-.global el1_start
-el1_start:
+.global start
+start:
 // setup stack pointer for kernel
 ldr x0, =_stack_top
 mov sp, x0
@@ -23,14 +23,14 @@ mov x2, #0
 ldr x0, =welcome
 bl puts
 
-b .
 
 // initialize exception vector
-adr x0, el1_vector
+adr x0, exception_vector
 msr VBAR_EL1, x0
+
 // Configure state
-mrs x0, DAIF
-orr x0, x0, #0x3C0 // mask everything
+//mrs x0, DAIF
+//orr x0, x0, #0x3C0 // mask everything
 
 
 // debug print
@@ -42,7 +42,9 @@ bl putreg
 // initialize kernel
 ldr x0, =init
 bl puts
-bl el1_init
+bl init_kernel
+
+b .
 
 // initialize userspace
 ldr x0, =user

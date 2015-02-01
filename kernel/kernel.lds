@@ -1,10 +1,10 @@
 OUTPUT_FORMAT("elf64-littleaarch64", "elf64-littleaarch64", "elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
-ENTRY(el1_start)
+ENTRY(start)
 
 MEMORY
 {
-	ram(rwx): ORIGIN = 0x80000000, LENGTH = 16M
+	ram(rwx): ORIGIN = 0x80000000, LENGTH = 64M
 }
 
 ram_top = ORIGIN(ram) + LENGTH(ram);
@@ -39,11 +39,9 @@ SECTIONS
 		. = ALIGN(16);
 		_ebss = .;
 	} > ram
+	. += 16384;
 	. = ALIGN(4096);
+	_stack_top = .;
 	_heap_start = .;
-	. += 4096 ;
-	_user_stack_top = . ;
-
-	_stack_top = ram_top - 16;
 }
 end = .;  /* define a global symbol marking the end of application */

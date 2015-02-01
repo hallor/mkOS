@@ -6,9 +6,8 @@ include ../build.mk
 
 build: kernel.img
 
-
 subdirs := core drivers lib lib_3rdparty
-objs:= el1_entry.o el1_main.o el1_vector.o
+objs:= entry.o exception.o init.o
 
 DEPS := $(addsuffix .d, $(objs))
 define add_files
