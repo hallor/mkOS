@@ -34,7 +34,6 @@ void * kmalloc(unsigned size)
     size = ALIGN_UP(size);
     while (m) {
         if (m->total_size - m->offset > size) {
-            puts("kmalloc: found free mem in chunk\n");
             m->offset += size;
             return m->data + m->offset - size;
         }

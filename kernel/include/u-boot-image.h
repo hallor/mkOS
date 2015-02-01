@@ -151,6 +151,7 @@
  * Legacy format image header,
  * all data in network byte order (aka natural aka bigendian).
  */
+typedef uint32_t __be32;
 typedef struct image_header {
 	__be32		ih_magic;	/* Image Header Magic Number	*/
 	__be32		ih_hcrc;	/* Image Header CRC Checksum	*/
@@ -165,13 +166,5 @@ typedef struct image_header {
 	uint8_t		ih_comp;	/* Compression Type		*/
 	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
 } image_header_t;
-
-typedef struct image_info {
-        ulong           start, end;             /* start/end of blob */
-        ulong           image_start, image_len; /* start of image within blob, len of image */
-        ulong           load;                   /* load addr for the image */
-        uint8_t         comp, type, os;         /* compression, type of image, os type */
-        uint8_t         arch;                   /* CPU architecture */
-} image_info_t;
 
 #endif	/* __IMAGE_H__ */
