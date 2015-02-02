@@ -39,109 +39,112 @@ exception_vector:
 
 // Vectors 0x0 - 0x180 -> from current EL with SP_EL0
 .align  7
-SynchronousExceptionSP0:
-exception_params
-bl bad_sync
-eret
-
+vector_from_el1_sp0_sync:
+	b handler_from_el1_sp0_sync
 .align  7
-IrqSP0:
-exception_params
-	bl bad_irq
-	eret
-
+vector_from_el1_sp0_irq:
+	b handler_from_el1_sp0_irq
 .align  7
-FiqSP0:
-exception_params
-	bl bad_fiq
-	eret
-
+vector_from_el1_sp0_fiq:
+	b handler_from_el1_sp0_fiq
 .align  7
-SErrorSP0:
-exception_params
-	bl bad_error
-	eret
+vector_from_el1_sp0_serror:
+	b handler_from_el1_sp0_serror
 
-// Vectors 0x200 - 0x380 -> from current EL with SP_ELx
+// Vectors 0x200 - 0x380 -> from current EL with SP_EL1
 .align  7
-SynchronousExceptionSPx:
-exception_params
-	bl do_sync
-	b 1f
-
+vector_from_el1_sp1_sync:
+	b handler_from_el1_sp1_sync
 .align  7
-IrqSPx:
-exception_params
-	bl do_irq
-	eret
-
+vector_from_el1_sp1_irq:
+	b handler_from_el1_sp1_irq
 .align  7
-FiqSPx:
-exception_params
-	bl do_fiq
-	eret
-
+vector_from_el1_sp1_fiq:
+	b handler_from_el1_sp1_fiq
 .align  7
-SErrorSPx:
-exception_params
-	bl do_error
-	b 1f
+vector_from_el1_sp1_serror:
+	b handler_from_el1_sp1_serror
 
 // Vectors 0x400 - 0x580 -> from lower EL in AA64
 .align  7
-	SynchronousException_lowerEL_AA64:
-	el0_context_store
-	exception_params
-	bl trap_sync_from_el0
-    el0_context_restore_and_eret
-
+vector_from_el0_aa64_sync:
+	b handler_from_el0_aa64_sync
 .align  7
-Irq_lowerEL_AA64:
-	el0_context_store
-	exception_params
-	bl trap_irq_from_el0
-	el0_context_restore_and_eret
-
+vector_from_el0_aa64_irq:
+	b handler_from_el0_aa64_irq
 .align  7
-Fiq_lowerEL_AA64:
-	el0_context_store
-	exception_params
-	bl trap_fiq_from_el0
-	el0_context_restore_and_eret
-
+vector_from_el0_aa64_fiq:
+	b handler_from_el0_aa64_fiq
 .align  7
-SError_lowerEL_AA64:
-	el0_context_store
-	exception_params
-	bl trap_serror_from_el0
-	el0_context_restore_and_eret
+vector_from_el0_aa64_serror:
+	b handler_from_el0_aa64_serror
 
 // Vectors 0x600 - 0x780 -> from lower EL in AA32
 .align  7
-SynchronousException_lowerEL_AA32:
-	exception_params
-	bl bad_sync
-	eret
-
+vector_from_el0_aa32_sync:
+	b handler_from_el0_aa32_sync
 .align  7
-Irq_lowerEL_AA32:
-	exception_params
-	bl bad_irq
-	eret
-
+vector_from_el0_aa32_irq:
+	b handler_from_el0_aa32_irq
 .align  7
-Fiq_lowerEL_AA32:
-	exception_params
-	bl bad_fiq
-	eret
-
+vector_from_el0_aa32_fiq:
+	b handler_from_el0_aa32_fiq
 .align  7
-SError_lowerEL_AA32:
-	exception_params
-	bl bad_error
-	eret
+vector_from_el0_aa32_serror:
+	b handler_from_el0_aa32_serror
 
+
+// full handlers handlers
+// from EL1 with SP0
+handler_from_el1_sp0_sync:
+handler_from_el1_sp0_irq:
+handler_from_el1_sp0_fiq:
+handler_from_el1_sp0_serror:
+	adr x0, not_supported_sp0_msg
+	b panic
+// from EL1 with SP1
+handler_from_el1_sp1_sync:
+handler_from_el1_sp1_irq:
+handler_from_el1_sp1_fiq:
+handler_from_el1_sp1_serror:
+	adr x0, kernel_crashed
+	b panic
+// from EL0 AA64
+handler_from_el0_aa64_sync:
+	el0_context_store
+	exception_params
+	bl trap_sync_from_el0_aa64
+	el0_context_restore_and_eret
+handler_from_el0_aa64_irq:
+	el0_context_store
+	exception_params
+	bl trap_irq_from_el0_aa64
+	el0_context_restore_and_eret
+handler_from_el0_aa64_fiq:
+	el0_context_store
+	exception_params
+	bl trap_fiq_from_el0_aa64
+	el0_context_restore_and_eret
+handler_from_el0_aa64_serror:
+	el0_context_store
+	exception_params
+	bl trap_serror_from_el0_aa64
+	el0_context_restore_and_eret
+// from EL0 AA32
+handler_from_el0_aa32_sync:
+handler_from_el0_aa32_irq:
+handler_from_el0_aa32_fiq:
+handler_from_el0_aa32_serror:
+	adr x0, not_supported_aa32_msg
+	b panic
+
+
+panic:
+cbz x0, 1f
+bl puts
 1:
 wfe
 b 1b
-
+not_supported_sp0_msg: .asciz "Panic: Unexpected exception from EL1 using sp0. System halted.\n";
+kernel_crashed: .asciz "Panic: Unexpected exception from EL1 using SP1. System halted.\n";
+not_supported_aa32_msg: .asciz "Panic: Unexpected exception from 32-bit EL0. System halted.\n";

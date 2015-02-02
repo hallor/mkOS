@@ -71,7 +71,7 @@ void translate_exception_syndrome(uint64_t esr)
 
 }
 
-void trap_sync_from_el0(uint64_t esr)
+void trap_sync_from_el0_aa64(uint64_t esr)
 {
     int ec = esr >> 26;
 
@@ -96,17 +96,17 @@ void trap_sync_from_el0(uint64_t esr)
     }
 }
 
-void trap_irq_from_el0(uint64_t esr)
+void trap_irq_from_el0_aa64(uint64_t esr)
 {
     wrn("IRQ in %s tid %d. ESR: %#llx\n", current->name, current->tid, esr);
 }
 
-void trap_fiq_from_el0(uint64_t esr)
+void trap_fiq_from_el0_aa64(uint64_t esr)
 {
     wrn("FIQ in %s tid %d. ESR: %#llx\n", current->name, current->tid, esr);
 }
 
-void trap_serror_from_el0(uint64_t esr)
+void trap_serror_from_el0_aa64(uint64_t esr)
 {
     wrn("SError in %s tid %d. ESR: %#llx\n", current->name, current->tid, esr);
     translate_exception_syndrome(esr);
