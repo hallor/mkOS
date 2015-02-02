@@ -21,12 +21,12 @@
 #include "syscalls.h"
 #include "task.h"
 
-void translate_exception_syndrome(uint64_t esr)
+static void translate_exception_syndrome(uint64_t esr)
 {
     int ec = esr >> 26;
     int il = esr >> 25 & 0x1;
     int iss = esr & 0x1FFFFFF;
-    printk("IL: %#x (%d-bit instruction) ISS: %#x EC: %#x EC_Explanation: ", il, il ? 32 : 16, iss, ec);
+    printk("ESR: %#x IL: %#x (%d-bit instruction) ISS: %#x EC: %#x EC_Explanation: ", esr, il, il ? 32 : 16, iss, ec);
     switch (ec)
     {
     case 0x0: puts("Unknown reason\n"); break;
@@ -71,6 +71,18 @@ void translate_exception_syndrome(uint64_t esr)
 
 }
 
+static void dump_cpu_context(struct cpu_ctx * ctx)
+{
+    int i;
+    printk("ELR: %#llx CPSR: %#llx SP: %#llx PC: %#llx LR: %#llx\n",
+        ctx->lr, ctx->spsr, ctx->sp, ctx->pc, ctx->lr);
+    for (i=0; i<30; ++i) {
+        printk("X%2i: %#16llx ", i, ctx->gpr[i]);
+        if (i % 4 == 3)
+            puts("\n");
+    }
+}
+
 void trap_sync_from_el0_aa64(uint64_t esr)
 {
     int ec = esr >> 26;
@@ -80,17 +92,9 @@ void trap_sync_from_el0_aa64(uint64_t esr)
         dbg("svc at %s tid %d pc %#llx\n", current->name, current->tid, current->ctx.pc);
         do_syscall(imm, current);
     } else {
-        int i;
         wrn("Exception in %s tid %d\n", current->name, current->tid);
         translate_exception_syndrome(esr);
-
-        printk("ELR: %#llx CPSR: %#llx SP: %#llx PC: %#llx LR: %#llx\n",
-            current->ctx.lr, current->ctx.spsr, current->ctx.sp, current->ctx.pc, current->ctx.lr);
-        for (i=0; i<30; ++i) {
-            printk("X%2i: %#16llx ", i, current->ctx.gpr[i]);
-            if (i % 4 == 3)
-                puts("\n");
-        }
+        dump_cpu_context(&current->ctx);
         puts("\n");
         panic("No handler designed.\n");
     }
@@ -112,67 +116,19 @@ void trap_serror_from_el0_aa64(uint64_t esr)
     translate_exception_syndrome(esr);
 }
 
+// Kernel crash handlers - they're different, as they will have cpu context on stack
+void trap_sync_from_el1_sp1(uint64_t esr, struct cpu_ctx * ctx)
+{
+    err("sync exception from kernel mode.\n");
+    translate_exception_syndrome(esr);
+    dump_cpu_context(ctx);
+    panic("Kernel Panic\n");
+}
 
-void bad_sync(uint64_t esr)
+void trap_serror_from_el1_sp1(uint64_t esr, struct cpu_ctx * ctx)
 {
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
+    err("Serror exception from kernel mode.\n");
     translate_exception_syndrome(esr);
-}
-void bad_irq(uint64_t esr)
-{
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
-}
-void bad_fiq(uint64_t esr)
-{
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
-}
-void bad_error(uint64_t esr)
-{
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
-    translate_exception_syndrome(esr);
-}
-void do_sync(uint64_t esr)
-{
-    uint64_t pc;
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR", esr);
-    asm("mrs %0, ELR_EL1": "=r"(pc));
-    putreg("PC", pc);
-    translate_exception_syndrome(esr);
-}
-void do_irq(uint64_t esr)
-{
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
-}
-void do_fiq(uint64_t esr)
-{
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
-}
-void do_error(uint64_t esr)
-{
-    puts("Exception: ");
-    puts(__FUNCTION__);
-    puts("\n");
-    putreg("ESR: ", esr);
-    translate_exception_syndrome(esr);
+    dump_cpu_context(ctx);
+    panic("Kernel Panic\n");
 }

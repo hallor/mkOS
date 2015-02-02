@@ -19,15 +19,17 @@
  */
 
 #ifdef __ASSEMBLY__
-// Stores current context in current structure
+// Stores current context at address pointed by x9
 .macro el0_context_store
-    ldr x9, =current // throw away x9
+    str x9, [sp, #-8]! // save x9
+    ldr x9, =current
     ldr x9, [x9] // dereference current
     stp x0, x1, [x9], #16
     stp x2, x3, [x9], #16
     stp x4, x5, [x9], #16
     stp x6, x7, [x9], #16
-    stp x8, xzr, [x9], #16  // throw away x9
+    ldr x7, [sp], #8 // saved x9
+    stp x8, x7, [x9], #16
     stp x10, x11, [x9], #16
     stp x12, x13, [x9], #16
     stp x14, x15, [x9], #16
@@ -49,6 +51,38 @@
     mov x10, xzr
     mov x11, xzr
 .endm
+
+// stores current context as stack variable
+.macro el1_context_store
+    sub sp, sp, #272
+    stp x0, x1, [sp], #16
+    stp x2, x3, [sp], #16
+    stp x4, x5, [sp], #16
+    stp x6, x7, [sp], #16
+    stp x8, x9, [sp], #16
+    stp x10, x11, [sp], #16
+    stp x12, x13, [sp], #16
+    stp x14, x15, [sp], #16
+    stp x16, x17, [sp], #16
+    stp x18, x19, [sp], #16
+    stp x20, x21, [sp], #16
+    stp x22, x23, [sp], #16
+    stp x24, x25, [sp], #16
+    stp x26, x27, [sp], #16
+    stp x28, x29, [sp], #16
+    add x10, sp, #32 // original SP
+    stp x30, x10, [sp], #16 // LR and SP from user
+
+    mrs x10, SPSR_EL1 // old CPSR
+    mrs x11, ELR_EL1 // old PC (eret address)
+    stp x10, x11, [sp], #16
+    sub sp, sp, #272 // new top of stack
+.endm
+
+.macro el1_context_drop
+    add sp, sp, #272 // throw away cpu_ctx structure
+.endm
+#warning TODO: el1_context_restore_and_eret + check if stack not smashed in context_store
 
 // restores current context from current and returns from exception
 .macro el0_context_restore_and_eret
