@@ -10,7 +10,7 @@ NM       := $(CROSS_COMPILE)nm
 STRIP    := $(CROSS_COMPILE)strip
 OBJCOPY  := $(CROSS_COMPILE)objcopy
 OBJDUMP  := $(CROSS_COMPILE)objdump
-
+MKIMAGE  := mkimage
 
 ASFLAGS := -D__ASSEMBLY__ -mcpu=cortex-a57 -mgeneral-regs-only
 CFLAGS := -Wall -g -ggdb -fno-builtin -mcpu=cortex-a57 -O0 -fPIC -mgeneral-regs-only

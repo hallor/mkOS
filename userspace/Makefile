@@ -28,4 +28,4 @@ test.bin: test.app
 
 get_entry= $(shell readelf -h test.app  | grep "Entry point address:" | tr -s " " | cut -d " " -f 5)
 test.img: test.bin test.app
-	mkimage -A arm64 -O u-boot -T standalone -C none -a 0x80100000 -e $(get_entry) -n "test-app" -d test.bin $@
+	$(MKIMAGE) -A arm64 -O u-boot -T standalone -C none -a 0x80100000 -e $(get_entry) -n "test-app" -d test.bin $@
