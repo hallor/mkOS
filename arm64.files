@@ -65,3 +65,6 @@ kernel/lib/printk.c
 kernel/include/printk.h
 kernel/lib_3rdparty/div64.h
 kernel/lib_3rdparty/div64.c
+kernel/include/sizes.h
+kernel/lib/bitops.c
+kernel/include/bitops.h

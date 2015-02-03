@@ -27,4 +27,15 @@ int strncmp(const char *s1, const char *s2, unsigned n);
 size_t strlen(const char *s);
 size_t strnlen(const char *s, size_t maxlen);
 uint32_t ntohl(uint32_t d);
+
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 #endif // UTIL_H

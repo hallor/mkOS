@@ -24,8 +24,9 @@
 int page_init(void);
 void * page_alloc(int num_pages);
 
-#define PAGE_NO(addr) (addr & PAGE_MASK)
+#define PAGE_NO(addr) ((addr) >> PAGE_SHIFT)
+#define PAGE_ADDR(addr) ((addr) & PAGE_MASK)
 
-#define ALIGN_PGUP(X) ( (X + PAGE_MASK) & ~PAGE_MASK )
-
+#define ALIGN_PGUP(X) ( ((X) + PAGE_MASK) & ~PAGE_MASK )
+#define ALIGN_PGDOWN(X) ( (X) & ~PAGE_MASK )
 #endif // PAGE_H
