@@ -56,6 +56,8 @@ struct task * find_free_task()
     return 0;
 }
 
+void parse_elf(void * blob, unsigned size);
+
 static void task_load(const char *name)
 {
     int fd = vfs_open(name);
@@ -92,6 +94,7 @@ static void task_load(const char *name)
     task->ctx.pc = task->vma_addr + ntohl(hdr.ih_ep) - ntohl(hdr.ih_load);
 
     ret = vfs_read(fd, task->vma_addr, task->vma_size);
+    parse_elf(task->vma_addr, task->vma_size);
     if (ret != task->vma_size) {
         err("Failed to read executable. Task %s is invalid.\n", task->name);
         return;

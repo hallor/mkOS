@@ -15,12 +15,12 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bitops.h"
+#include <stdint.h>
+#include "printk.h"
+#include "elf64.h"
 
-
-int clz(uint64_t v)
+void parse_elf(void * blob, unsigned size)
 {
-    uint64_t result;
-    asm("clz %0, %1" : "=r"(result) : "r"(v));
-    return result;
+    info("Parsing ELF header @ %#llx; %d bytes\n", blob, size);
+    panic("And it failed...\n");
 }
