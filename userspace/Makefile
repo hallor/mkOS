@@ -1,7 +1,7 @@
 include ../config.mk
 ASFLAGS := $(ASFLAGS) -Iinclude
 CFLAGS := $(CFLAGS) -Iinclude -pie
-LDFLAGS := $(LDFLAGS) -T app.lds -pie
+LDFLAGS := $(LDFLAGS) -T app.lds -pie -static
 include ../build.mk
 
 build: test.img
@@ -25,6 +25,7 @@ test.app: $(objs)
 
 test.bin: test.app
 	$(OBJCOPY) -O binary test.app test.bin
+$(info Fix this makefile - it doesn't rebuild app properly.\n")
 
 get_entry= $(shell readelf -h test.app  | grep "Entry point address:" | tr -s " " | cut -d " " -f 5)
 test.img: test.bin test.app
