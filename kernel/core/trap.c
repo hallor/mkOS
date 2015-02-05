@@ -92,7 +92,7 @@ void trap_sync_from_el0_aa64(uint64_t esr)
         dbg("svc at %s tid %d pc %#llx\n", current->name, current->tid, current->ctx.pc);
         do_syscall(imm, current);
     } else {
-        wrn("Exception in %s tid %d\n", current->name, current->tid);
+        wrn("Synchronous exception in %s tid %d\n", current->name, current->tid);
         translate_exception_syndrome(esr);
         dump_cpu_context(&current->ctx);
         puts("\n");

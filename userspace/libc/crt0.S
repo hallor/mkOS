@@ -18,46 +18,12 @@
 // Entry point
 .global _start
 _start:
-// write task # to task
-mov x28, x0 // save tid
-adr x1, ex
-add x0, x0, #'0'
-strb w0, [x1, #28] // store byte
-adr x1, ex2
-strb w0, [x1, #27] // store byte
-
-// print it
-adr x0, ex
-svc #0 // print
-svc #2 // yield
-cbnz x28, 1f
-svc #2 // yield again for tid 0
-1:
-adr x0, ex2
-svc #0 // print
-svc #2 // yield
-
+adr x0, msg
+svc #0
 svc #1 // exit
-
-1:
-wfi
-b 1b
-
-mov sp, x0
-
-mov x0, #1 // 1 == puts
-ldr x1, =ex
-svc #0 // syscall
-
-svc #42
-b .
-// setup stack pointer
-//ldr x0, =_stack_top
-//mov sp, x0
-
 // zero bss
-ldr x0, =_sbss
-ldr x1, =_ebss
+adr x0, _sbss
+adr x1, _ebss
 sub x2, x0, x1
 cbz x2, 2f
 mov x2, #0
@@ -69,9 +35,10 @@ mov x2, #0
 	b 1b
 
 2:
-	b __libc_main
-	svc #42
-	b .
+	bl __libc_main
+	svc #1 // exit task
 
-ex: .asciz "Hello from userspace @ Task #.\n"
-ex2: .asciz "Bye from userspace @ Task #.\n"
+1:
+	wfe
+	b 1b
+msg: .asciz "Can't proceed further - need MMU :(\n"

@@ -114,7 +114,7 @@ void task_create()
         tasks[i].tid = i;
         tasks[i].state = TASK_INVALID;
     }
-    for (i=0; i<3; ++i) {
+    for (i=0; i<1; ++i) {
         task_load("test-app");
     }
 }

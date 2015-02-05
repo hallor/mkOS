@@ -14,9 +14,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <stdint.h>
 #include "task.h"
 #include "printk.h"
+#include "page.h"
 typedef void (*sys_handler_t)(struct task *);
 
 
@@ -39,10 +40,20 @@ static void sys_exit(struct task * task)
     task_next(); // switch to next task
 }
 
+//static void * sys_mmap(void * addr, size_t len, int prot, int flags, int fd, int offset)
+static void * sys_mmap(struct task * task)
+{
+    unsigned len = task->ctx.gpr[0];
+    len = ALIGN_PGUP(len);
+    dbg("mmap requested by task %d: %d bytes.\n", task->tid, len);
+    return page_alloc(len >> PAGE_SHIFT);
+}
+
 sys_handler_t syscall_handlers[] = {
     sys_print,
     sys_exit,
     sys_yield,
+    sys_mmap,
 };
 
 

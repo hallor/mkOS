@@ -3,6 +3,6 @@
 
 int main(void)
 {
-//	puts("Welcome from userspace\n");
+    puts("Welcome from userspace\n");
 	return 0;
 }

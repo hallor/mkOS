@@ -1,7 +1,7 @@
 include ../config.mk
 ASFLAGS := $(ASFLAGS) -Iinclude
-CFLAGS := $(CFLAGS) -Iinclude
-LDFLAGS := $(LDFLAGS) -T app.lds
+CFLAGS := $(CFLAGS) -Iinclude -pie
+LDFLAGS := $(LDFLAGS) -T app.lds -pie
 include ../build.mk
 
 build: test.img

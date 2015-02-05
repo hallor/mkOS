@@ -30,7 +30,7 @@ kernel/init.c
 kernel/exception.S
 kernel/kernel.lds
 kernel/Makefile
-userspace/app1/el0_main.c
+userspace/app1/app.c
 userspace/app1/Makefile
 userspace/include/stdio.h
 userspace/libc/crt0.S
@@ -68,3 +68,4 @@ kernel/lib_3rdparty/div64.c
 kernel/include/sizes.h
 kernel/lib/bitops.c
 kernel/include/bitops.h
+userspace/include/syscall.h

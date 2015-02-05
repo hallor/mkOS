@@ -1,1 +1,1 @@
-obj-y:=el0_main.o
+obj-y:=app.o
