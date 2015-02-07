@@ -27,6 +27,10 @@ test.bin: test.app
 	$(OBJCOPY) -O binary test.app test.bin
 $(info Fix this makefile - it doesn't rebuild app properly.\n")
 
+test.app.stripped: test.app
+	cp -f $^ $@
+	$(STRIP) -s $@
+
 get_entry= $(shell readelf -h test.app  | grep "Entry point address:" | tr -s " " | cut -d " " -f 5)
-test.img: test.bin test.app
+test.img: test.bin test.app.stripped
 	$(MKIMAGE) -A arm64 -O u-boot -T standalone -C none -a 0x80100000 -e $(get_entry) -n "test-app" -d test.app $@

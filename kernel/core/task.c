@@ -56,8 +56,7 @@ struct task * find_free_task()
     return 0;
 }
 
-void parse_elf(void * blob, unsigned size);
-
+int load_elf(struct task * task, void * blob, unsigned size);
 static void task_load(const char *name)
 {
     int fd = vfs_open(name);
@@ -91,14 +90,21 @@ static void task_load(const char *name)
     task->ctx.lr = 0x0;
     task->ctx.sp = page_alloc(2); // two pages for stack
     task->ctx.spsr = 0x3C0; // User, AA64
-    task->ctx.pc = task->vma_addr + ntohl(hdr.ih_ep) - ntohl(hdr.ih_load);
+    task->ctx.pc = 0;
 
     ret = vfs_read(fd, task->vma_addr, task->vma_size);
-    parse_elf(task->vma_addr, task->vma_size);
     if (ret != task->vma_size) {
         err("Failed to read executable. Task %s is invalid.\n", task->name);
         return;
     }
+    // TODO: replace kmalloc'd area with some temporary buffer or sth
+    ret = load_elf(task, task->vma_addr, task->vma_size);
+    if (ret) {
+        err("Failed to parse elf.\n");
+        return;
+    }
+    task->ctx.pc = task->vma_addr + ntohl(hdr.ih_ep) - ntohl(hdr.ih_load);
+
 
     task->state = TASK_ACTIVE;
     info("Created task '%s' with tid %d. VMA: %#llx pc = %#llx sp = %#llx\n",
