@@ -9,7 +9,7 @@ build: test.img
 clean:
 	rm -f $(objs) $(DEPS) test.app test.bin test.img
 
-subdirs := libc app1
+subdirs := libc app1 ld
 
 define add_files
 obj-y:=

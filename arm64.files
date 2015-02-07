@@ -32,6 +32,7 @@ kernel/include/uart.h
 kernel/include/util.h
 kernel/include/vfs.h
 kernel/lib/bitops.c
+kernel/lib/elf.c
 kernel/lib/kern_console.c
 kernel/lib/kmalloc.c
 kernel/lib/Makefile
@@ -57,6 +58,7 @@ userspace/app1/app.c
 userspace/app1/Makefile
 userspace/include/stdio.h
 userspace/include/syscall.h
+userspace/ld/Makefile
 userspace/libc/crt0.S
 userspace/libc/crt1.c
 userspace/libc/Makefile
@@ -70,4 +72,3 @@ debug.sh
 Makefile
 readme.txt
 run.sh
-kernel/lib/elf.c
