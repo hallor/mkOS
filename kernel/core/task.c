@@ -84,27 +84,31 @@ static void task_load(const char *name)
     }
 
     memcpy(task->name, hdr.ih_name, CONFIG_MAX_FILE_NAME); // todo: strncpy
-    task->vma_size = ntohl(hdr.ih_size);
-    task->vma_addr = kmalloc(task->vma_size);
+    task->vma_size = 0;
+    task->vma_addr = 0;
+    task->stack_base = page_alloc(2);
+    task->stack_size = PAGE_SIZE * 2;
     task->ctx.gpr[0] = task->tid;
     task->ctx.lr = 0x0;
-    task->ctx.sp = page_alloc(2); // two pages for stack
+    task->ctx.sp = task->stack_size; // two pages for stack
     task->ctx.spsr = 0x3C0; // User, AA64
     task->ctx.pc = 0;
 
-    ret = vfs_read(fd, task->vma_addr, task->vma_size);
-    if (ret != task->vma_size) {
+    // for now use page allocator as it's able to free memory contrary to kmalloc
+    unsigned data_size = ntohl(hdr.ih_size);
+    void * data_blob = page_alloc(ALIGN_PGUP(data_size) >> PAGE_SHIFT);
+    ret = vfs_read(fd, data_blob, data_size);
+    if (ret != ntohl(hdr.ih_size)) {
         err("Failed to read executable. Task %s is invalid.\n", task->name);
         return;
     }
-    // TODO: replace kmalloc'd area with some temporary buffer or sth
-    ret = load_elf(task, task->vma_addr, task->vma_size);
+    ret = load_elf(task, data_blob, data_size);
+    page_free(data_blob, ALIGN_PGUP(data_size) >> PAGE_SHIFT);
     if (ret) {
         err("Failed to parse elf.\n");
         return;
     }
-    task->ctx.pc = task->vma_addr + ntohl(hdr.ih_ep) - ntohl(hdr.ih_load);
-
+    task->ctx.pc = (uintptr_t)task->vma_addr + ntohl(hdr.ih_ep) - ntohl(hdr.ih_load);
 
     task->state = TASK_ACTIVE;
     info("Created task '%s' with tid %d. VMA: %#llx pc = %#llx sp = %#llx\n",
@@ -113,6 +117,14 @@ static void task_load(const char *name)
 
     if (!current)
         current = task;
+}
+
+void task_exit(struct task * task)
+{
+    info("task_exit task %s tid %d\n", task->name, task->tid);
+    page_free(task->stack_base, task->stack_size >> PAGE_SHIFT);
+    page_free(task->vma_addr, task->vma_size >> PAGE_SHIFT);
+    task->state = TASK_INVALID;
 }
 
 void task_create()

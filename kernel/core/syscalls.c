@@ -37,6 +37,7 @@ static void sys_exit(struct task * task)
 {
     dbg("(%s:%d) sys_exit()\n", task->name, task->tid);
     task->state = TASK_DEAD;
+    task_exit(task);
     task_next(); // switch to next task
 }
 

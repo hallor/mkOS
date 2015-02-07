@@ -20,7 +20,7 @@
 #include "elf64.h"
 #include "util.h"
 #include "task.h"
-#include "kmalloc.h"
+#include "page.h"
 
 static const char *pheader_types[] =
 {
@@ -54,21 +54,23 @@ static const char * str_perms(uint16_t perms)
 
 static void parse_program_header(struct task * t,void * blob, unsigned size, unsigned num, unsigned hdr_offset)
 {
-    info("Parsing program header. size: %d number: %d\n", size, num);
+    dbg("Parsing program header. size: %d number: %d\n", size, num);
     Elf64_Phdr * hdr = blob;
     if (size != sizeof(Elf64_Phdr))
         panic("Wrong program header size.\n");
     while (num--) {
-    info("%s perms: %s file_ofs: %#llx",
+    dbg("%s perms: %s file_ofs: %#llx",
          pheader_types[hdr->p_type], str_perms(hdr->p_flags), hdr->p_offset);
     printk(" paddr: %#llx vaddr: %#llx file_size: %#llx mem_size: %#llx align: %#llx\n",
          hdr->p_paddr, hdr->p_vaddr, hdr->p_filesz, hdr->p_memsz, hdr->p_align);
     if (hdr->p_type == PT_LOAD) {
         if (t->vma_addr == 0) {
-            t->vma_addr = kmalloc(hdr->p_memsz);
-            t->vma_size = hdr->p_memsz;
-            info("Loading program... %d bytes to %d byte mem blob at %#x\n", hdr->p_filesz, hdr->p_memsz, t->vma_addr);
+            t->vma_size = ALIGN_PGUP(hdr->p_memsz);
+            t->vma_addr = page_alloc(t->vma_size >> PAGE_SHIFT);
+            info("Loading program... %d bytes to %d (%d) byte mem blob at %#x\n",
+                 hdr->p_filesz, hdr->p_memsz, t->vma_size, t->vma_addr);
             memcpy(t->vma_addr, blob + hdr->p_offset - hdr_offset, hdr->p_filesz);
+            memset(t->vma_addr + hdr->p_filesz, 0, t->vma_size - hdr->p_filesz);
         }
     }
     hdr ++;
@@ -118,7 +120,7 @@ static void parse_section_header(void * blob, unsigned size, unsigned num, unsig
 static void parse_elf(struct task * t, void * blob, unsigned size)
 {
     Elf64_Ehdr *hdr = blob;
-    info("Parsing ELF header @ %#llx; %d bytes\n", blob, size);
+    dbg("Parsing ELF header @ %#llx; %d bytes\n", blob, size);
     if (size < sizeof(Elf64_Ehdr)) {
         wrn("Image too small.\n");
         goto fail;
@@ -137,19 +139,19 @@ static void parse_elf(struct task * t, void * blob, unsigned size)
         wrn("Unsupported elf endiannes\n");
         goto fail;
     }
-    info("ABI: %02x ABI_v: %02x \n", hdr->e_ident[EI_OSABI], hdr->e_ident[EI_ABIVERSION]);
+    dbg("ABI: %02x ABI_v: %02x \n", hdr->e_ident[EI_OSABI], hdr->e_ident[EI_ABIVERSION]);
 
-    info("type: %hx machine: %hd version: %x\n", hdr->e_type, hdr->e_machine, hdr->e_version);
+    dbg("type: %hx machine: %hd version: %x\n", hdr->e_type, hdr->e_machine, hdr->e_version);
     if (hdr->e_machine != EM_AARCH64) {
         wrn("Unsupported target machine.\n");
         goto fail;
     }
 
-    info("entry: %#llx program header starts at %#llx section header starts at %#llx\n",
+    dbg("entry: %#llx program header starts at %#llx section header starts at %#llx\n",
          hdr->e_entry, hdr->e_phoff, hdr->e_shoff);
-    info("arch_flags: %#x elf_header_size: %#hx\n", hdr->e_flags, hdr->e_ehsize);
+    dbg("arch_flags: %#x elf_header_size: %#hx\n", hdr->e_flags, hdr->e_ehsize);
     parse_program_header(t, blob + hdr->e_phoff, hdr->e_phentsize, hdr->e_phnum, hdr->e_phoff);
-    parse_section_header(blob + hdr->e_shoff, hdr->e_shentsize, hdr->e_shnum, hdr->e_shstrndx);
+//    parse_section_header(blob + hdr->e_shoff, hdr->e_shentsize, hdr->e_shnum, hdr->e_shstrndx);
     return;
 
  fail:
@@ -159,8 +161,6 @@ static void parse_elf(struct task * t, void * blob, unsigned size)
 int load_elf(struct task * task, void * blob, unsigned size)
 {
     info("Loading task %s; blob size: %d\n", task->name, size);
-    task->vma_addr = 0;
-    task->vma_size = 0;
     parse_elf(task, blob, size);
     return task->vma_addr == 0;
 }

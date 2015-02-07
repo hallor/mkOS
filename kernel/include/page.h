@@ -23,6 +23,7 @@
 
 int page_init(void);
 void * page_alloc(int num_pages);
+void page_free(void *paddr, int num_pages);
 
 #define PAGE_NO(addr) ((addr) >> PAGE_SHIFT)
 #define PAGE_ADDR(addr) ((addr) & PAGE_MASK)

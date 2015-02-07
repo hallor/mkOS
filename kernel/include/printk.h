@@ -20,7 +20,7 @@
 int printk(const char *format, ...);
 void puts(const char * s);
 
-#define __sys_msg(CO, CL, X,...) printk(CO"[$][%s] %s:%d "X"\e[37;40;0m", CL, __THIS_FILE__, __LINE__,##__VA_ARGS__)
+#define __sys_msg(CO, CL, X,...) printk(CO"[$][%5s] %5s:%d "X"\e[37;40;0m", CL, __THIS_FILE__, __LINE__,##__VA_ARGS__)
 
 #define dbg(...) __sys_msg("\e[2;37m","DEBUG", __VA_ARGS__)
 #define info(...) __sys_msg("\e[32m","INFO", __VA_ARGS__)

@@ -148,6 +148,7 @@ static void * get_memory_from_pool(unsigned page_cnt)
         add_memory_to_pool(p->start_page_no + page_cnt, (1 << biggest_zone) - page_cnt);
         p->next_page = free;
         free = p;
+        dbg("got pages, start page %d num pages %d\n", p->start_page_no, page_cnt);
         return mem_pool_start + (p->start_page_no << PAGE_SHIFT);
     }
 
@@ -183,4 +184,10 @@ int page_init(void)
 void *page_alloc(int num_pages)
 {
     return get_memory_from_pool(num_pages);
+}
+
+void page_free(void *paddr, int num_pages)
+{
+    dbg("page_free start page: %d num pages: %d\n", (uintptr_t) (paddr - mem_pool_start) >> PAGE_SHIFT, num_pages);
+    add_memory_to_pool((uintptr_t)(paddr - mem_pool_start) >> PAGE_SHIFT, num_pages);
 }

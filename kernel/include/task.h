@@ -34,10 +34,13 @@ struct task {
     enum task_state state;
     void * vma_addr;
     unsigned vma_size;
+    void * stack_base;
+    unsigned stack_size;
 };
 
 extern struct task * current;
 
 void task_create(void);
 void task_next(void);
+void task_exit(struct task * task);
 #endif // TASK_H
