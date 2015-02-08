@@ -1,1 +1,1 @@
-obj-y += early_uart.o
+obj-y += early_uart.o timer.o

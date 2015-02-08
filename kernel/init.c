@@ -23,6 +23,7 @@
 #include "util.h"
 #include "kmalloc.h"
 #include "printk.h"
+#include "timer.h"
 
 /* Memory map:
  * VE_NORFLASH1
@@ -43,6 +44,8 @@ void init_kernel(void)
     page_init();
     kmalloc_init();
     vfs_init();
+    timer_init();
+    panic("bleble");
     task_create();
 }
 

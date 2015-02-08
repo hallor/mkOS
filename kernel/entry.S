@@ -19,6 +19,8 @@
 
 .global start
 start:
+// TODO: setup CPU here
+
 // setup stack pointer for kernel
 ldr x0, =_stack_top
 mov sp, x0

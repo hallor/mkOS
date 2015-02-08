@@ -14,6 +14,8 @@ kernel/core/vfs.c
 kernel/core/vma.c
 kernel/drivers/early_uart.S
 kernel/drivers/Makefile
+kernel/include/arch.h
+kernel/include/arch_helpers.h
 kernel/include/asm.h
 kernel/include/bitops.h
 kernel/include/config.h
@@ -72,3 +74,5 @@ debug.sh
 Makefile
 readme.txt
 run.sh
+kernel/drivers/timer.c
+kernel/include/timer.h

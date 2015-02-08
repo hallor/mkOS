@@ -38,9 +38,11 @@
 // pl031
 #define CONFIG_RTC0_ADDR 0x1c170000
 
-
 #define CONFIG_MAX_FILE_NAME 32
 #define CONFIG_MAX_FILES 64
 #define CONFIG_PRINTK_BUFFER_LEN 1024
+
+//default systimer frequency - 1s
+#define CONFIG_TIMER_FREQ 1
 
 #endif // CONFIG_H
