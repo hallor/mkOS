@@ -17,16 +17,39 @@
 #include "config.h"
 #include "image.h"
 .macro puts string
-ldr x0,=\string
+adr x0,\string
 bl uart_puts
 .endm
 
 .global start
 start:
+
 // setup stack pointer for bootloader
 ldr x0, =_stack_top
 mov sp, x0
 
+puts init
+
+// copy code
+puts reloc
+nop
+ldr x0, =__copy_start // TODO __copy_start
+ldr x1, =__copy_end // TODO __copy_end
+ldr x2, =CONFIG_NOR_CS0_START // copy-from-address
+
+1:
+    ldr x3, [x2], #8
+    str x3, [x0], #8
+    cmp x0, x1
+    b.lt 1b
+puts jump
+ldr x0, =in_ram
+br x0
+b do_panic
+
+in_ram:
+
+puts bssc
 // setup bss
 ldr x0, =_sbss
 ldr x1, =_ebss
@@ -43,10 +66,14 @@ mov x2, #0
 puts welcome
 bl main
 puts pre_panic
+do_panic:
 puts panic
 b .
 
+init: .asciz "I"
+bssc: .asciz "B"
+reloc: .asciz "R"
+jump: .asciz "J"
 welcome: .asciz "mkBOOT 1.0\n"
 pre_panic: .asciz "Error: main() finished!\n"
 panic: .asciz "BL panic!\n"
-

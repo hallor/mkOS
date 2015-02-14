@@ -4,7 +4,7 @@ ENTRY(start)
 
 MEMORY
 {
-	ram(rwx): ORIGIN = 0x80000000, LENGTH = 64M
+	ram(rwx): ORIGIN = 0x40000000, LENGTH = 64M
 }
 
 ram_top = ORIGIN(ram) + LENGTH(ram);

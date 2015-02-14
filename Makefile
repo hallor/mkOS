@@ -1,5 +1,5 @@
 #all: kernel.img
-all: build flash.cfi
+all: build flash.cfi boot.cfi
 clean:
 
 subdirs := boot kernel userspace
@@ -17,6 +17,15 @@ $(foreach dir,$(subdirs),$(eval $(call add_subdir,$(dir))))
 
 kernel/kernel.img: kernel-build
 userspace/test.img: userspace-build
+boot/boot.bin: boot-build
+
+
+boot.img: boot/boot.bin
+	cat $^ > $@
+
+boot.cfi: boot.img
+	cp -f $^ $@
+	truncate -s 64M $@
 
 flash.img: kernel/kernel.img userspace/test.img
 	cat $^ > $@
@@ -26,4 +35,4 @@ flash.cfi: flash.img
 	truncate -s 64M $@
 
 clean:
-	rm -f flash.cfi flash.img
+	rm -f flash.cfi flash.img boot.img boot.cfi

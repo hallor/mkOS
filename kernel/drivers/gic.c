@@ -41,8 +41,8 @@
 #define GICC_DIR    0x1000
 
 
-#define GICD_REG(R) (CONFIG_GIC_CPU_BASE + 0x1000 + R)
-#define GICC_REG(R) (CONFIG_GIC_CPU_BASE + 0x2000 + R)
+#define GICD_REG(R) (CONFIG_GICD_CPU_BASE + R)
+#define GICC_REG(R) (CONFIG_GICC_CPU_BASE + R)
 
 #define gicd_read(r) ioread32(GICD_REG(r))
 #define gicd_write(r, v) iowrite32(GICD_REG(r), v)
@@ -93,7 +93,7 @@ void gic_dump(void)
 void gic_init()
 {
     int i;
-    info("Initializing gic @%#llx\n", CONFIG_GIC_CPU_BASE);
+    info("Initializing gicd @%#llx gicc @%#llx\n", CONFIG_GICD_CPU_BASE, CONFIG_GICC_CPU_BASE);
     gic_irq_cnt = gicd_read(GICD_TYPER) & 0xF;
     gic_irq_cnt = 32 * (gic_irq_cnt + 1);
 

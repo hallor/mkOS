@@ -1,3 +1,3 @@
 #!/bin/sh
-echo "Attach gdb"
-qemu-system-aarch64 -machine vexpress-a15 -cpu cortex-a57 -kernel boot/boot.elf -m 64M -s -S -nographic -bios flash.cfi || tset
+qemu-system-aarch64 -s -S -cpu cortex-a57 -machine virt -nographic \
+-drive file=boot.cfi,if=pflash,unit=0,format=raw -drive file=flash.cfi,if=pflash,unit=1,format=raw || tset

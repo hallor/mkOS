@@ -89,7 +89,7 @@ void load_kernel(void * from)
         return;
     }
     if (ntohl(image->ih_load) < CONFIG_RAM_START || ntohl(image->ih_load) >= CONFIG_RAM_START + CONFIG_RAM_SIZE/2 ) {
-        print("Image doesn't fit in RAM]n");
+        print("Image doesn't fit in RAM\n");
         return;
     }
     if (ntohl(image->ih_load) + ntohl(image->ih_size) > CONFIG_RAM_START + CONFIG_RAM_SIZE/2) {
@@ -107,6 +107,6 @@ void load_kernel(void * from)
 int main(void)
 {
     dbg("Now running in C\n");
-    load_kernel((void*)CONFIG_NOR_CS0_START);
+    load_kernel((void*)CONFIG_NOR_CS1_START);
     while(1) {}
 }

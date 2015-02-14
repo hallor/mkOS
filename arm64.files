@@ -13,7 +13,9 @@ kernel/core/trap.c
 kernel/core/vfs.c
 kernel/core/vma.c
 kernel/drivers/early_uart.S
+kernel/drivers/gic.c
 kernel/drivers/Makefile
+kernel/drivers/timer.c
 kernel/include/arch.h
 kernel/include/arch_helpers.h
 kernel/include/asm.h
@@ -22,6 +24,8 @@ kernel/include/config.h
 kernel/include/cpu.h
 kernel/include/elf64.h
 kernel/include/elf_common.h
+kernel/include/gic.h
+kernel/include/io.h
 kernel/include/kern_console.h
 kernel/include/kmalloc.h
 kernel/include/page.h
@@ -29,6 +33,7 @@ kernel/include/printk.h
 kernel/include/sizes.h
 kernel/include/syscalls.h
 kernel/include/task.h
+kernel/include/timer.h
 kernel/include/u-boot-image.h
 kernel/include/uart.h
 kernel/include/util.h
@@ -71,11 +76,7 @@ base.mk
 build.mk
 config.mk
 debug.sh
+gdb.sh
 Makefile
 readme.txt
 run.sh
-kernel/drivers/timer.c
-kernel/include/timer.h
-kernel/drivers/gic.c
-kernel/include/gic.h
-kernel/include/io.h

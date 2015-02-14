@@ -26,7 +26,7 @@ clean:
 
 get_entry= $(shell readelf -h kernel.elf  | grep "Entry point address:" | tr -s " " | cut -d " " -f 5)
 kernel.img: kernel.bin kernel.elf
-	$(MKIMAGE) -A arm64 -O u-boot -T kernel -C none -a 0x80000000 -e $(get_entry) -n "mkOS-kernel" -d kernel.bin $@
+	$(MKIMAGE) -A arm64 -O u-boot -T kernel -C none -a 0x40000000 -e $(get_entry) -n "mkOS-kernel" -d kernel.bin $@
 
 kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary $< $@

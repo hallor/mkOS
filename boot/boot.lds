@@ -4,17 +4,18 @@ ENTRY(start)
 
 MEMORY
 {
-    ram(rwx): ORIGIN = 0x80000000 + 33554432, LENGTH = 33554432
+		ram(rwx): ORIGIN = 0x40000000 + 0x2000000, LENGTH = 0x2000000
 }
 
 ram_top = ORIGIN(ram) + LENGTH(ram);
 
 SECTIONS
 {
-	. = ALIGN(16);
+. = ALIGN(16);
 	.text : {
+		__copy_start = .;
 		_stext = .;
-		*(.vectors)
+		init.o(.text)
 		*(.text)
 		*(.rodata)                 /* read-only data (constants) */
 		*(.rodata*)
@@ -30,6 +31,8 @@ SECTIONS
 		. = ALIGN(16);
 		_edata = .;
 	} > ram
+
+	__copy_end = .;
 
 	/* collect all uninitialized .bss sections */
 	.bss (NOLOAD) : {
