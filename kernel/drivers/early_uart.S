@@ -14,10 +14,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ #include "config.h"
+
 //int uart_get(void);
 .global uart_get
 uart_get:
-ldr x1, =0x1c090000
+ldr x1, =CONFIG_UART0_ADDR
 1:
     nop
     ldr x0, [x1, #0x18]
@@ -30,7 +32,7 @@ ret
 //void uart_put(int c);
 .global uart_put
 uart_put:
-ldr x1, =0x1c090000
+ldr x1, =CONFIG_UART0_ADDR
 1:
     nop
     ldr x2, [x1, #0x18]

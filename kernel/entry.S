@@ -39,6 +39,7 @@ mov x2, #0
 	b 1b
 
 2:
+
 ldr x0, =welcome
 bl puts
 
