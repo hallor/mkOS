@@ -24,6 +24,7 @@
 #include "kmalloc.h"
 #include "printk.h"
 #include "timer.h"
+#include "gic.h"
 
 /* Memory map:
  * VE_NORFLASH1
@@ -44,6 +45,7 @@ void init_kernel(void)
     page_init();
     kmalloc_init();
     vfs_init();
+    gic_init();
     timer_init();
     panic("bleble");
     task_create();

@@ -45,4 +45,5 @@
 //default systimer frequency - 1s
 #define CONFIG_TIMER_FREQ 1
 
+#define CONFIG_GIC_CPU_BASE 0x2c000000
 #endif // CONFIG_H

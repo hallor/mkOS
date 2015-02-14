@@ -115,6 +115,10 @@
     mov x11, xzr
     eret // return from exception
 .endm
-#endif // __ASSEMBLY__
+#else // __ASSEMBLY__
 
+#define MRS(S, V) asm("mrs %0,"#S"\n" : "=r"(V))
+#define MSR(S, V) asm("msr "#S",%0\n" : :"r"(V))
+
+#endif
 #endif // ASM_H

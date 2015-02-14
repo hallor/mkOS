@@ -76,3 +76,6 @@ readme.txt
 run.sh
 kernel/drivers/timer.c
 kernel/include/timer.h
+kernel/drivers/gic.c
+kernel/include/gic.h
+kernel/include/io.h
