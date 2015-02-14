@@ -20,6 +20,7 @@
 #include "util.h"
 #include "syscalls.h"
 #include "task.h"
+#include "gic.h"
 
 static void translate_exception_syndrome(uint64_t esr)
 {
@@ -82,6 +83,13 @@ static void dump_cpu_context(struct cpu_ctx * ctx)
             puts("\n");
     }
 }
+
+void trap_irq_from_el1_aa64(uint64_t esr)
+{
+    wrn("IRQ in kernel mode. ESR: %#llx\n", esr);
+    gic_handle_irq();
+}
+
 
 void trap_sync_from_el0_aa64(uint64_t esr)
 {

@@ -20,37 +20,7 @@ void timer_init(void)
     MSR(CNTP_TVAL_EL0, reg);
     MSR(CNTP_CTL_EL0, 0x1); // enable interrupts
     gic_enable_interrupts(); // enable interrupts
-    info("Initializing timer. Fimer frequency: %d, HZ=%d\n", timer_frequency, CONFIG_TIMER_FREQ);
-    timer_dump();
-    dump_reg(CurrentEL);
-    dump_reg(DAIF);
-    asm("msr daifclr, #0x7\n");
-//    MSR(DAIF, 0x2);
-    dump_reg(DAIF);
-    dump_reg(SPSel);
-
-//    dump_reg(ICC_SRE_EL1);
-
-    dump_reg(CNTP_CVAL_EL0);
-    dump_reg(CNTP_TVAL_EL0);
-    dump_reg(CNTPCT_EL0);
-    gic_dump();
-    while(1) {
-        MRS(CNTP_CTL_EL0, reg);
-        if (reg & ~ 0x1) {
-            info("Timer zadzwonil.\n");
-//            dump_reg(CNTP_CVAL_EL0);
-//            dump_reg(CNTP_TVAL_EL0);
-//            dump_reg(CNTPCT_EL0);
-            gic_dump();
-            asm("wfi");
-
-//            break;
-        }
-//        dump_reg(CNTP_TVAL_EL0);
-    }
-//    dump_reg(ICC_SRE_EL1);
-    info("Timer zadzwonil2.\n");
+    info("Initialized timer. Timer frequency: %d, HZ=%d\n", timer_frequency, CONFIG_TIMER_FREQ);
 }
 
 

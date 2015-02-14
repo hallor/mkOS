@@ -115,8 +115,10 @@ handler_from_el1_sp1_sync:
 	b panic
 handler_from_el1_sp1_irq:
 handler_from_el1_sp1_fiq:
-	adr x0, kernel_crashed
-	b panic
+	el1_context_push
+	exception_params
+	bl trap_irq_from_el1_aa64
+	el1_context_pop_and_eret
 handler_from_el1_sp1_serror:
 	el1_context_store
 	mov x1, sp // save cpu_ctx address as arg2
@@ -167,3 +169,4 @@ not_supported_sp0_msg: .asciz "Panic: Unexpected exception from EL1 using sp0. S
 kernel_crashed: .asciz "Panic: Unexpected exception from EL1 using SP1. System halted.\n";
 not_supported_aa32_msg: .asciz "Panic: Unexpected exception from 32-bit EL0. System halted.\n";
 system_halted: .asciz "System Halted.\n";
+irq_received_in_kernel: .asciz "Interrupt received in kernel mode.\n";

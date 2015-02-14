@@ -20,6 +20,7 @@
 _start:
 adr x0, msg
 svc #0
+b .
 svc #1 // exit
 // zero bss
 adr x0, _sbss
@@ -27,7 +28,6 @@ adr x1, _ebss
 sub x2, x0, x1
 cbz x2, 2f
 mov x2, #0
-
 1:
 	cmp x1, x0
 	b.ge 2f

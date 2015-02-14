@@ -47,7 +47,13 @@ void init_kernel(void)
     vfs_init();
     gic_init();
     timer_init();
-    panic("bleble");
+    // enable interrupts
+    asm("msr daifclr, #0x3\n");
+    info("wfi...\n");
+    asm("wfi");
+    info("wfi...\n");
+    asm("wfi");
+    panic("dupa\n");
     task_create();
 }
 

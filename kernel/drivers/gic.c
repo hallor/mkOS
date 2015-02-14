@@ -12,6 +12,7 @@
 #define GICD_ISENABLER(n) (0x100 + (n) * 4)
 #define GICD_ICENABLER(n) (0x180 + (n) * 4)
 #define GICD_ISPENDR(n)   (0x200 + (n) * 4)
+#define GICD_ICPENDR(n)   (0x280 + (n) * 4)
 #define GICD_ISACTIVER(n)  (0x300 + (n) * 4)
 #define GICD_ICACTIVER(n)  (0x380 + (n) * 4)
 #define GICD_IPRIORITYR(n)(0x400 + (n) * 4)
@@ -51,9 +52,17 @@
 
 static unsigned gic_irq_cnt = 0;
 
+// called in interrupt context
+void gic_handle_irq(void)
+{
+    printk("Gic interrupt.\n");
+    gic_dump();
+    gicd_write(GICD_ICPENDR(0), 0x40000000); // clear interrupt
+}
+
 void gic_enable_interrupts(void)
 {
-    iowrite32(GICC_REG(GICC_CTLR), 3); // enable signaling of interrupts
+    iowrite32(GICC_REG(GICC_CTLR), 1); // enable signaling of interrupts
 }
 
 void gic_disable_interrupts(void)
@@ -63,29 +72,29 @@ void gic_disable_interrupts(void)
 
 void gic_dump(void)
 {
-  unsigned i;
-  printk("GICD_IIDR %#x GICD_TYPER %#x\n", gicd_read(GICD_IIDR), gicd_read(GICD_TYPER));
-  printk("GICC_IIDR %#x GICC_IAR %#x\n", gicc_read(GICC_IIDR), gicc_read(GICC_IAR));
+    unsigned i;
+    printk("GICD_IIDR %#x GICD_TYPER %#x\n", gicd_read(GICD_IIDR), gicd_read(GICD_TYPER));
+    printk("GICC_IIDR %#x GICC_IAR %#x\n", gicc_read(GICC_IIDR), gicc_read(GICC_IAR));
 
-  printk("%d interrupts.\n", gic_irq_cnt);
-  printk("GICD_IPRIORITY = ");
-  for (i=0; i<gic_irq_cnt / 32; ++i)
-    printk("0x%08x ", gicd_read(GICD_IPRIORITYR(i)));
-  printk("\nGICD_ITARGETSR = ");
-  for (i=0; i<gic_irq_cnt / 32; ++i)
-    printk("0x%08x ", gicd_read(GICD_ITARGETSR(i)));
-  printk("\nGICD_ISENABLER = ");
-  for (i=0; i<gic_irq_cnt / 32; ++i)
-    printk("0x%08x ", gicd_read(GICD_ISENABLER(i)));
-  printk("\nGICD_ISPENDR =   ");
-  for (i=0; i<gic_irq_cnt / 32; ++i)
-    printk("0x%08x ", gicd_read(GICD_ISPENDR(i)));
-  printk("\nGICD_ISACTIVER = ");
-  for (i=0; i<gic_irq_cnt / 32; ++i)
-    printk("0x%08x ", gicd_read(GICD_ISACTIVER(i)));
-  printk("\n");
-  printk("GICC_IAR 0x%08x GICC_HPPIR 0x%08x GICC_AIAR 0x%08x\n",
-         gicc_read(GICC_IAR), gicc_read(GICC_HPPIR), gicc_read(GICC_AIAR));
+    printk("%d interrupts.\n", gic_irq_cnt);
+    printk("GICD_IPRIORITY = ");
+    for (i=0; i<gic_irq_cnt / 4; ++i)
+        printk("0x%08x ", gicd_read(GICD_IPRIORITYR(i)));
+    printk("\nGICD_ITARGETSR = ");
+    for (i=0; i<gic_irq_cnt / 4; ++i)
+        printk("0x%08x ", gicd_read(GICD_ITARGETSR(i)));
+    printk("\nGICD_ISENABLER = ");
+    for (i=0; i<gic_irq_cnt / 32; ++i)
+        printk("0x%08x ", gicd_read(GICD_ISENABLER(i)));
+    printk("\nGICD_ISPENDR   = ");
+    for (i=0; i<gic_irq_cnt / 32; ++i)
+        printk("0x%08x ", gicd_read(GICD_ISPENDR(i)));
+    printk("\nGICD_ISACTIVER = ");
+    for (i=0; i<gic_irq_cnt / 32; ++i)
+        printk("0x%08x ", gicd_read(GICD_ISACTIVER(i)));
+    printk("\n");
+    printk("GICC_IAR 0x%08x GICC_HPPIR 0x%08x GICC_AIAR 0x%08x\n",
+           gicc_read(GICC_IAR), gicc_read(GICC_HPPIR), gicc_read(GICC_AIAR));
 
 }
 
@@ -97,21 +106,24 @@ void gic_init()
     gic_irq_cnt = gicd_read(GICD_TYPER) & 0xF;
     gic_irq_cnt = 32 * (gic_irq_cnt + 1);
 
-    gic_dump();
+//    gic_dump();
     // Initialize distributor
-    gicd_write(GICD_IGROUPR(0), 0xFFFFFFFF); // all for group 1
-    gicd_write(GICD_ISENABLER(0), 0xFFFFFFFF); // enable all
-    for (i=0; i<gic_irq_cnt / 4; ++i) {
-      gicd_write(GICD_IPRIORITYR(i), 0xFFFFFFFF);
-      gicd_write(GICD_ITARGETSR(i), 0xFFFFFFFF);
+    for (i=0; i<gic_irq_cnt / 32; ++i) {
+        gicd_write(GICD_IGROUPR(i), 0x0); // all for group 0
+        gicd_write(GICD_ISENABLER(i), 0xFFFFFFFF); // enable all
     }
-    gicd_write(GICD_ICFGR(0), 0xAAAAAAAA);
-    gicd_write(GICD_ICFGR(1), 0xAAAAAAAA);
+    for (i=0; i<gic_irq_cnt / 4; ++i) {
+        gicd_write(GICD_IPRIORITYR(i), 0xF0F0F0F0);
+        gicd_write(GICD_ITARGETSR(i),  0xFFFFFFFF);
+    }
+    for (i=0; i<gic_irq_cnt / 16; ++i)
+        gicd_write(GICD_ICFGR(i), 0xAAAAAAAA);
+//    gicd_write(GICD_ICFGR(1), 0xAAAAAAAA);
 
-    gicd_write(GICD_CTLR, 3); // enable
+    gicd_write(GICD_CTLR, 1); // enable
     // Initialize CPU interface
-    gicc_write(GICC_PMR, 0);
-    gicc_write(GICC_CTLR, 3); // enable
+    gicc_write(GICC_PMR, 0xF8);
+//    gicc_write(GICC_CTLR, 1); // enable
 
-    gicd_write(GICD_ISACTIVER(0), 0xFFFFFFFF);
+//    gicd_write(GICD_ISACTIVER(0), 0xFFFFFFFF);
 }

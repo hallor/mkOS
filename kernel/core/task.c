@@ -91,7 +91,7 @@ static void task_load(const char *name)
     task->ctx.gpr[0] = task->tid;
     task->ctx.lr = 0x0;
     task->ctx.sp = task->stack_size; // two pages for stack
-    task->ctx.spsr = 0x3C0; // User, AA64
+    task->ctx.spsr = 0x300; // User, AA64, enabled interrupts
     task->ctx.pc = 0;
 
     // for now use page allocator as it's able to free memory contrary to kmalloc
