@@ -101,7 +101,7 @@ int vfs_init(void)
     fds_next = 0;
     memset(fds, 0, sizeof(struct file_descriptor) * fds_max);
 
-    parse_flash((void*)CONFIG_NOR_CS0_START, CONFIG_NOR_CS0_SIZE);
+    parse_flash((void*)CONFIG_NOR_CS1_START, CONFIG_NOR_CS1_SIZE);
     return 0;
 }
 

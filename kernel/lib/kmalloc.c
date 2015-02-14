@@ -18,6 +18,7 @@
 #include "kmalloc.h"
 #include "page.h"
 #include "printk.h"
+#include "util.h"
 
 // align do 16 bytes
 #define ALIGN_UP(X) ((X + 0xF) & ~0xF)
@@ -71,6 +72,14 @@ void * kmalloc(unsigned size)
     // Now allocate size elems
     m->offset += size;
     return m->data + m->offset - size;
+}
+
+void * kzalloc(unsigned size)
+{
+    void * p = kmalloc(size);
+    if (p)
+        memset(p, 0, size);
+    return p;
 }
 
 void kfree(void * d)

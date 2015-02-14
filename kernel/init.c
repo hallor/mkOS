@@ -26,19 +26,8 @@
 #include "timer.h"
 #include "gic.h"
 
-/* Memory map:
- * VE_NORFLASH1
- *VE_NORFLASHALIAS -> 0x0
- *64M
- *0x08000000 -> norflash0 cfi -> bios
- *0x0c000000 -> norflash1 cfi
- *    [VE_UART0] = 0x1c090000, pl011
-    [VE_TIMER01] = 0x1c110000, sp804
-    [VE_RTC] = 0x1c170000, <- pl031
-    [VE_COMPACTFLASH] = 0x1c1a0000, N/A
-
- **/
-
+void timer_do(void);
+void gic_do(void);
 void init_kernel(void)
 {
     info("Initializing kernel...\n");
@@ -47,13 +36,7 @@ void init_kernel(void)
     vfs_init();
     gic_init();
     timer_init();
-    // enable interrupts
-    asm("msr daifclr, #0x3\n");
-    info("wfi...\n");
-    asm("wfi");
-    info("wfi...\n");
-    asm("wfi");
-    panic("dupa\n");
+    gic_enable_interrupts();
     task_create();
 }
 

@@ -21,6 +21,7 @@
 #include "syscalls.h"
 #include "task.h"
 #include "gic.h"
+#include "timer.h"
 
 static void translate_exception_syndrome(uint64_t esr)
 {
@@ -111,11 +112,14 @@ void trap_sync_from_el0_aa64(uint64_t esr)
 void trap_irq_from_el0_aa64(uint64_t esr)
 {
     wrn("IRQ in %s tid %d. ESR: %#llx\n", current->name, current->tid, esr);
+    gic_handle_irq();
 }
 
 void trap_fiq_from_el0_aa64(uint64_t esr)
 {
     wrn("FIQ in %s tid %d. ESR: %#llx\n", current->name, current->tid, esr);
+    gic_handle_irq();
+
 }
 
 void trap_serror_from_el0_aa64(uint64_t esr)

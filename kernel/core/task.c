@@ -25,6 +25,7 @@
 
 #define MAX_TASKS 50
 static struct task tasks[MAX_TASKS];
+static struct task idle;
 
 struct task *current = 0;
 
@@ -41,6 +42,7 @@ void task_next()
 
     if (current->state != TASK_ACTIVE) {
         panic("No more tasks are active.\n");
+        current = &idle;
     }
     dbg("context switch to %s tid %d\n", current->name, current->tid);
 }
@@ -127,6 +129,27 @@ void task_exit(struct task * task)
     task->state = TASK_INVALID;
 }
 
+static void idle_loop(void)
+{
+    asm("wfi");
+}
+
+static void add_idle(void)
+{
+    struct task * task = &idle;
+    memcpy(task->name, "idle", 5); // todo: strncpy
+    task->vma_size = 0;
+    task->vma_addr = 0;
+    task->stack_base = page_alloc(1);
+    task->stack_size = PAGE_SIZE * 2;
+    task->ctx.gpr[0] = 0;
+    task->ctx.lr = 0x0;
+    task->ctx.sp = task->stack_size; // two pages for stack
+    task->ctx.spsr = 0x300; // User, AA64, enabled interrupts
+    task->ctx.pc = (uint64_t)idle_loop;
+    task->state = TASK_ACTIVE;
+}
+
 void task_create()
 {
     int i;
@@ -135,7 +158,9 @@ void task_create()
         tasks[i].tid = i;
         tasks[i].state = TASK_INVALID;
     }
-    for (i=0; i<1; ++i) {
+    info("Creating idle task...\n");
+    add_idle();
+    for (i=0; i<2; ++i) {
         task_load("test-app");
     }
 }

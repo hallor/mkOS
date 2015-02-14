@@ -19,5 +19,6 @@
 
 void kmalloc_init(void);
 void * kmalloc(unsigned size);
+void * kzalloc(unsigned size);
 void kfree(void * d);
 #endif // KMALLOC_H
