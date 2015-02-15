@@ -80,3 +80,5 @@ gdb.sh
 Makefile
 readme.txt
 run.sh
+kernel/include/mm.h
+kernel/core/mm.c

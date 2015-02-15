@@ -25,6 +25,7 @@
 #include "printk.h"
 #include "timer.h"
 #include "gic.h"
+#include "mm.h"
 
 void timer_do(void);
 void gic_do(void);
@@ -33,10 +34,15 @@ void init_kernel(void)
     info("Initializing kernel...\n");
     page_init();
     kmalloc_init();
+    volatile uint32_t * ptr = (void*)0xFFFF00000000LL;
+    printk("mmu-test1: %d\n", *ptr);
+    mmu_init();
+    printk("mmu-test2: %d\n", *ptr);
     vfs_init();
     gic_init();
     timer_init();
     gic_enable_interrupts();
     task_create();
+
 }
 
