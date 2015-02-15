@@ -16,16 +16,36 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "config.h"
 
 int printk(const char *format, ...);
 void puts(const char * s);
 
 #define __sys_msg(CO, CL, X,...) printk(CO"[$][%5s] %5s:%d "X"\e[37;40;0m", CL, __THIS_FILE__, __LINE__,##__VA_ARGS__)
 
+#if (PRINTK_LEVEL <= PRINTK_LEVEL_DBG)
 #define dbg(...) __sys_msg("\e[2;37m","DEBUG", __VA_ARGS__)
+#else
+#define dbg(...)
+#endif
+
+#if (PRINTK_LEVEL <= PRINTK_LEVEL_INFO)
 #define info(...) __sys_msg("\e[32m","INFO", __VA_ARGS__)
+#else
+#define info(...)
+#endif
+
+#if (PRINTK_LEVEL <= PRINTK_LEVEL_WRN)
 #define wrn(...) __sys_msg("\e[34m","WARN", __VA_ARGS__)
+#else
+#define wrn(...)
+#endif
+
+#if (PRINTK_LEVEL <= PRINTK_LEVEL_ERR)
 #define err(...) __sys_msg("\e[31m","ERROR", __VA_ARGS__)
+#else
+#define err(...)
+#endif
 
 #define panic(X,...) do { \
     puts("\n\n\e[31;40;1m[PANIC]"__FILE__":"); puts(__FUNCTION__ ); \

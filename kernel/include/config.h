@@ -50,4 +50,13 @@
 
 #define CONFIG_GICD_CPU_BASE 0x08000000
 #define CONFIG_GICC_CPU_BASE 0x08010000
+
+#define PRINTK_LEVEL_DBG 0x0
+#define PRINTK_LEVEL_INFO 0x1
+#define PRINTK_LEVEL_WRN 0x2
+#define PRINTK_LEVEL_ERR 0x3
+
+// lowest level of printk that will get printed
+#define PRINTK_LEVEL PRINTK_LEVEL_INFO
+
 #endif // CONFIG_H
