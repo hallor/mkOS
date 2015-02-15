@@ -80,6 +80,54 @@ entry l1table_ttbr1[512] __attribute__((aligned(4096))); // lower
 
 // we will map for now only 32-bit address space, so l0table has only 1 valid entry
 
+static void dump_table(entry *table, unsigned no_entries, uint64_t va_offset, int level)
+{
+    int i;
+    printk("Dumping table level %d at %p\n", level, table);
+    for (i=0; i< no_entries; ++i)
+    {
+        entry ent = table[i];
+        if (ent) {
+//            printk("%016llx\n", ent);
+            if ( (ent & 0x3) == 1) { // block
+                printk("Entry %d - Block VA: %#18llx PA: %#18llx ", i,
+                       va_offset + ((uint64_t)i << 30),
+                       ent & ((entry)0x3FFFF << 30));
+                printk("UXN: %x PXN: %x Cont: %x nG: %x, AF: %x SH:%x AP:%x NS: %x AttrIndx: %x\n",
+                       ent >> 54 & 0x1, ent >> 53 & 0x1, ent >> 52 & 0x1,
+                       ent >> 11 & 0x1, ent >> 10 & 0x1, ent >> 8 & 0x3,
+                       ent >> 6 & 0x3, ent >> 5 & 0x1, ent >> 2 & 0x7);
+            } else if ( (ent & 0x3) == 3) { // table
+                printk("Entry %d - Table NS: %x AP: %x UXN: %x PXN: %x\n",
+                       i, ent >> 63, ent >> 61 & 0x3, ent >> 60 & 0x1, ent >> 59 & 0x1);
+                dump_table(ent & ((entry)0xFFFFFFFFF << 12), 512, va_offset + ((uint64_t)i << (39 - level * 9)), level + 1); // works for level 0 and 1 ;)
+            } else {
+                printk("Unknown table entry: %016llx\n", ent);
+            }
+        }
+    }
+}
+
+static void dump_mmu(void)
+{
+    printk("MMU dump.\n");
+    printk("MMU is %s. TTBR0=0x%016llx TTBR1=0x%016llx TCR=0x%016llx\n", read_sctlr_el1() & 0x1 ?
+               "enabled" : "disabled", read_ttbr0_el1(), read_ttbr1_el1(), read_tcr_el1());
+
+    uint64_t reg = read_tcr_el1();
+    printk("TCR TBI1: %x TBI0: %x, AS: %x IPS: %x TG1: %x SH1: %x ORGN1: %x IRGN1: %x"
+           "EPD1: %x A1: %x T1SZ: %x TG0: %x SH0: %x ORGN0: %x IRGN0: %x EPD0: %x T0SZ: %x\n",
+           reg >> 38 & 0x1, reg >> 37 & 0x1, reg >> 36 & 0x1,
+           reg >> 32 & 0x7, reg >> 30 & 0x3, reg >> 28 & 0x3, reg >> 26 & 0x3,
+           reg >> 24 & 0x3, reg >> 23 & 0x1, reg >> 22 & 0x1, reg >> 16 & 0x3f,
+           reg >> 14 & 0x3, reg >> 12 & 0x3, reg >> 10 & 0x3, reg >> 8 & 0x3,
+           reg >> 7 & 0x1, reg & 0x3f);
+    printk("Lower table:\n");
+    dump_table(read_ttbr0_el1(), 512, 0, 0);
+    printk("Upper table:\n");
+    dump_table(read_ttbr1_el1(), 512, 0xFFFF000000000000LL, 0);
+}
+
 void mmu_init(void)
 {
     int i;
@@ -93,7 +141,7 @@ void mmu_init(void)
     unsigned table_desc_flags = // page 1804
             0 | // PXN
             0 << 1 | // XN
-            0 << 2 | // AP - 01 = r/w access allowed for everyone, 00 - rw priv, r user
+            1 << 2 | // AP - 01 = r/w access allowed for everyone, 00 - rw priv, r user
             0 << 4; // NS - Secure PA space
 
     l0table_ttbr0[0] = make_table((uintptr_t)l1table_ttbr0, table_desc_flags, PG_4K); // TODO: flags
@@ -140,20 +188,23 @@ void mmu_init(void)
                 0  << 24  | // IRGN1- inner cacheability
                 0  << 23 | //EPD1
                 0  << 22 | // A1 - ttbr0 defines asid
-                32 << 16 | // T1SZ
+                (64 - 32) << 16 | // T1SZ
                 0  << 14 | // TG0, granularity - 4kb
                 0  << 12 | // SH0 - shareability
                 0  << 10 | // ORGN0 - outer cacheability
                 0  << 8  | // IRGN0- inner cacheability
                 0  << 7  | // EPD0
-                32 << 0  // T0SZ
+                (64 - 32) << 0  // T0SZ
                 );
     write_mair_el1(0x0); // Memory attribute register - whole memory is device nGnRnE
+    dump_mmu();
     printk("start mmu\n");
     asm("dmb sy");
     asm("dsb sy");
     asm("isb");
 //    asm("tlbi alle1"); // invalidate tlb1
-    write_sctlr_el1(read_sctlr_el1() | 0x1); // Enable MMU
+    write_sctlr_el1((read_sctlr_el1() & ~4) | 0x1); // Enable MMUm disable cache
+    asm("isb");
+
     panic(".");
 }
