@@ -38,4 +38,6 @@ uint32_t ntohl(uint32_t d);
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
+
 #endif // UTIL_H

@@ -32,7 +32,7 @@
 #define __ARCH_HELPERS_H__
 
 #include <arch.h>	/* for additional register definitions */
-#include <cdefs.h>	/* For __dead2 */
+//#include <cdefs.h>	/* For __dead2 */
 #include <stdint.h>
 
 /**********************************************************************
@@ -179,12 +179,6 @@ DEFINE_SYSOP_FUNC(isb)
 
 uint32_t get_afflvl_shift(uint32_t);
 uint32_t mpidr_mask_lower_afflvls(uint64_t, uint32_t);
-
-
-void __dead2 eret(uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3,
-		  uint64_t x4, uint64_t x5, uint64_t x6, uint64_t x7);
-void __dead2 smc(uint64_t x0, uint64_t x1, uint64_t x2, uint64_t x3,
-		 uint64_t x4, uint64_t x5, uint64_t x6, uint64_t x7);
 
 /*******************************************************************************
  * System register accessor prototypes

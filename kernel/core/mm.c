@@ -2,6 +2,8 @@
 #include "mm.h"
 #include "printk.h"
 #include "page.h"
+#include "arch_helpers.h"
+#include "util.h"
 
 typedef uint64_t entry;
 enum granule {
@@ -9,11 +11,6 @@ enum granule {
     PG_16K,
     PG_64K
 };
-
-static entry make_invalid()
-{
-    return 0x0;
-}
 
 // addr == 64-bit address, not shifted
 static entry make_block(uint64_t addr, unsigned uba, unsigned lba, enum granule g, unsigned level)
@@ -75,7 +72,88 @@ static entry make_table(uint64_t next_table_addr, int flags, enum granule g)
 }
 // TODO: l3 descriptors
 
+entry l0table_ttbr0[512] __attribute__((aligned(4096))); // lower, use 4k pages, 9bit resolved in lookup
+entry l1table_ttbr0[512] __attribute__((aligned(4096))); // lower
+
+entry l0table_ttbr1[512] __attribute__((aligned(4096))); // lower, use 4k pages, 9bit resolved in lookup
+entry l1table_ttbr1[512] __attribute__((aligned(4096))); // lower
+
+// we will map for now only 32-bit address space, so l0table has only 1 valid entry
+
 void mmu_init(void)
 {
+    int i;
     info("Initializing mmu...\n");
+    memset(l0table_ttbr0, 0, sizeof(l0table_ttbr0));
+    memset(l1table_ttbr0, 0, sizeof(l1table_ttbr0));
+    memset(l0table_ttbr1, 0, sizeof(l0table_ttbr1));
+    memset(l1table_ttbr1, 0, sizeof(l1table_ttbr1));
+
+    // "userspace" mapping + mirror at high addresses
+    unsigned table_desc_flags = // page 1804
+            0 | // PXN
+            0 << 1 | // XN
+            0 << 2 | // AP - 01 = r/w access allowed for everyone, 00 - rw priv, r user
+            0 << 4; // NS - Secure PA space
+
+    l0table_ttbr0[0] = make_table((uintptr_t)l1table_ttbr0, table_desc_flags, PG_4K); // TODO: flags
+    l0table_ttbr1[0] = make_table((uintptr_t)l1table_ttbr1, table_desc_flags, PG_4K); // TODO: flags
+    // just 4 entries - 1gb each to cover whole 32-bit address space (for now)
+    for (i=0; i<4; ++i) {
+        // page 1796
+        unsigned block_flags_upper =
+                0 << 2 | // XN
+                0 << 1 | // PXN
+                0 << 0 | // conti - maybe enabled - cache of entries in TLB
+                0;
+        unsigned block_flags_lower =
+                0 << 9 | // nG - translation is global
+                1 << 8 | // AF - Access Flag - 1 - mark page as accessed (don't generate PG fault)
+                0 << 6 | // SH[1:0] - non shareable
+                0 << 4 | // AP[2:1] - rw priv, r user
+                0 << 3 | // NS - secure
+                0 << 0 | // AttrIndx - can be 0 as MAIR is set to 0 for all attributes
+                0;
+
+
+        l1table_ttbr0[i] = make_block((uint64_t)i << 30,
+                                      block_flags_upper,
+                                      block_flags_lower,
+                                      PG_4K, 1);
+        l1table_ttbr1[i] = make_block((uint64_t)i << 30,
+                                      block_flags_upper,
+                                      block_flags_lower,
+                                      PG_4K, 1);
+    }
+
+    write_ttbr0_el1((uintptr_t)l0table_ttbr0);
+    write_ttbr1_el1((uintptr_t)l0table_ttbr1);
+    write_tcr_el1(
+                0LL |
+                0LL  << 38 | // TBI1 -> top byte used for address calculation
+                0LL  << 37 | // TBI0 -> top byte used for address calculation
+                0LL  << 36 | // AS - ASID size
+                0LL  << 32 | // IPS - 32bit IPA
+                0LL  << 30 | // TG1, granularity - 4kb
+                0  << 28 | // SH1 - shareability
+                0  << 26 | // ORGN1- outer cacheability
+                0  << 24  | // IRGN1- inner cacheability
+                0  << 23 | //EPD1
+                0  << 22 | // A1 - ttbr0 defines asid
+                32 << 16 | // T1SZ
+                0  << 14 | // TG0, granularity - 4kb
+                0  << 12 | // SH0 - shareability
+                0  << 10 | // ORGN0 - outer cacheability
+                0  << 8  | // IRGN0- inner cacheability
+                0  << 7  | // EPD0
+                32 << 0  // T0SZ
+                );
+    write_mair_el1(0x0); // Memory attribute register - whole memory is device nGnRnE
+    printk("start mmu\n");
+    asm("dmb sy");
+    asm("dsb sy");
+    asm("isb");
+//    asm("tlbi alle1"); // invalidate tlb1
+    write_sctlr_el1(read_sctlr_el1() | 0x1); // Enable MMU
+    panic(".");
 }
