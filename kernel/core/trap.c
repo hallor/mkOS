@@ -23,6 +23,39 @@
 #include "gic.h"
 #include "timer.h"
 
+static void parse_dabt(uint32_t iss)
+{
+    // TODO: parse other fields
+    unsigned dfsc = iss & 0x3F;
+    printk("ISS: %#x: DFSC: %#x Explanation: ", iss, dfsc);
+    switch(dfsc)
+    {
+    case 0: puts("Address size fault, zeroth level of translation or ttbr\n"); break;
+    case 1: puts("Address size fault, first level\n"); break;
+        case 2: puts("Address size fault, second level\n"); break;
+        case 3: puts("Address size fault, third level\n"); break;
+        case 4: puts("Translation fault, zeroth level\n"); break;
+        case 5: puts("Translation fault, first level\n"); break;
+        case 6: puts("Translation fault, second level\n"); break;
+        case 7: puts("Translation fault, third level\n"); break;
+        case 9: puts("Access flag fault, first level\n"); break;
+        case 10: puts("Access flag fault, second level\n"); break;
+        case 11: puts("Access flag fault, third level\n"); break;
+        case 13: puts("Permission fault, first level\n"); break;
+        case 14: puts("Permission fault, second level\n"); break;
+        case 15: puts("Permission fault, thidr level\n"); break;
+        // TODO: other
+    default:
+        puts("Unknown or not implemented DFSC\n");
+    }
+}
+
+static void parse_iabt(uint32_t iss)
+{
+    parse_dabt(iss); // TODO: replace with proper parser
+
+}
+
 static void translate_exception_syndrome(uint64_t esr)
 {
     int ec = esr >> 26;
@@ -49,11 +82,11 @@ static void translate_exception_syndrome(uint64_t esr)
     case 0x17: puts("SMC from aa64\n"); break;
     case 0x18: puts("MSR, MRS or System instruction\n"); break;
     case 0x1F: puts("Impl. defined exception to EL3\n"); break;
-    case 0x20: puts("Instruction Abort from lower ex level\n"); break;
-    case 0x21: puts("Instruction Abort from current ex level\n"); break;
+    case 0x20: puts("Instruction Abort from lower ex level\n"); parse_iabt(iss); break;
+    case 0x21: puts("Instruction Abort from current ex level\n"); parse_iabt(iss); break;
     case 0x22: puts("Misaligned PC exception\n"); break;
-    case 0x24: puts("DABT from lower exception level\n"); break;
-    case 0x25: puts("DABT from current exception level\n"); break;
+    case 0x24: puts("DABT from lower exception level\n"); parse_dabt(iss); break;
+    case 0x25: puts("DABT from current exception level\n"); parse_dabt(iss); break;
     case 0x26: puts("Stack Pointer Alignment exception\n"); break;
     case 0x28: puts("Floating-point exception1\n"); break;
     case 0x2C: puts("Floating-point exception2\n"); break;

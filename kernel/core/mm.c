@@ -72,11 +72,11 @@ static entry make_table(uint64_t next_table_addr, int flags, enum granule g)
 }
 // TODO: l3 descriptors
 
-entry l0table_ttbr0[512] __attribute__((aligned(4096))); // lower, use 4k pages, 9bit resolved in lookup
-entry l1table_ttbr0[512] __attribute__((aligned(4096))); // lower
+entry l0table_ttbr0[512] __attribute__((aligned(4096 * 8))); // lower, use 4k pages, 9bit resolved in lookup
+entry l1table_ttbr0[512] __attribute__((aligned(4096 * 8))); // lower
 
-entry l0table_ttbr1[512] __attribute__((aligned(4096))); // lower, use 4k pages, 9bit resolved in lookup
-entry l1table_ttbr1[512] __attribute__((aligned(4096))); // lower
+entry l0table_ttbr1[512] __attribute__((aligned(4096 * 8))); // lower, use 4k pages, 9bit resolved in lookup
+entry l1table_ttbr1[512] __attribute__((aligned(4096 * 8))); // lower
 
 // we will map for now only 32-bit address space, so l0table has only 1 valid entry
 
@@ -141,11 +141,13 @@ void mmu_init(void)
     unsigned table_desc_flags = // page 1804
             0 | // PXN
             0 << 1 | // XN
-            1 << 2 | // AP - 01 = r/w access allowed for everyone, 00 - rw priv, r user
+            0 << 2 | // AP - 01 = r/w access allowed for everyone, 00 - rw priv, r user
             0 << 4; // NS - Secure PA space
 
-    l0table_ttbr0[0] = make_table((uintptr_t)l1table_ttbr0, table_desc_flags, PG_4K); // TODO: flags
-    l0table_ttbr1[0] = make_table((uintptr_t)l1table_ttbr1, table_desc_flags, PG_4K); // TODO: flags
+    for (i=0; i<1; ++i) {
+    l0table_ttbr0[i] = make_table((uintptr_t)l1table_ttbr0, table_desc_flags, PG_4K); // TODO: flags
+    l0table_ttbr1[i] = make_table((uintptr_t)l1table_ttbr1, table_desc_flags, PG_4K); // TODO: flags
+    }
     // just 4 entries - 1gb each to cover whole 32-bit address space (for now)
     for (i=0; i<4; ++i) {
         // page 1796
@@ -158,7 +160,7 @@ void mmu_init(void)
                 0 << 9 | // nG - translation is global
                 1 << 8 | // AF - Access Flag - 1 - mark page as accessed (don't generate PG fault)
                 0 << 6 | // SH[1:0] - non shareable
-                0 << 4 | // AP[2:1] - rw priv, r user
+                1 << 4 | // AP[2:1] - rw priv, r user
                 0 << 3 | // NS - secure
                 0 << 0 | // AttrIndx - can be 0 as MAIR is set to 0 for all attributes
                 0;
@@ -182,19 +184,19 @@ void mmu_init(void)
                 0LL  << 37 | // TBI0 -> top byte used for address calculation
                 0LL  << 36 | // AS - ASID size
                 0LL  << 32 | // IPS - 32bit IPA
-                0LL  << 30 | // TG1, granularity - 4kb
+                2LL  << 30 | // TG1, granularity - 4kb
                 0  << 28 | // SH1 - shareability
                 0  << 26 | // ORGN1- outer cacheability
                 0  << 24  | // IRGN1- inner cacheability
                 0  << 23 | //EPD1
                 0  << 22 | // A1 - ttbr0 defines asid
-                (64 - 32) << 16 | // T1SZ
+                24 << 16 | // T1SZ
                 0  << 14 | // TG0, granularity - 4kb
                 0  << 12 | // SH0 - shareability
                 0  << 10 | // ORGN0 - outer cacheability
                 0  << 8  | // IRGN0- inner cacheability
                 0  << 7  | // EPD0
-                (64 - 32) << 0  // T0SZ
+                24 << 0  // T0SZ
                 );
     write_mair_el1(0x0); // Memory attribute register - whole memory is device nGnRnE
     dump_mmu();
@@ -206,5 +208,4 @@ void mmu_init(void)
     write_sctlr_el1((read_sctlr_el1() & ~4) | 0x1); // Enable MMUm disable cache
     asm("isb");
 
-    panic(".");
 }

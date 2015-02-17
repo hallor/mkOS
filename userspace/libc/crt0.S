@@ -20,7 +20,11 @@
 _start:
 adr x0, msg
 svc #0
-b .
+1:
+wfi
+adr x0, cpu
+svc #0
+b 1b
 svc #1 // exit
 // zero bss
 adr x0, _sbss
@@ -42,3 +46,4 @@ mov x2, #0
 	wfe
 	b 1b
 msg: .asciz "Can't proceed further - need MMU :(\n"
+cpu: .asciz "I have cpu\n"

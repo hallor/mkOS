@@ -26,6 +26,7 @@
 #include "timer.h"
 #include "gic.h"
 #include "mm.h"
+#include "arch_helpers.h"
 
 void timer_do(void);
 void gic_do(void);
@@ -34,15 +35,21 @@ void init_kernel(void)
     info("Initializing kernel...\n");
     page_init();
     kmalloc_init();
-    volatile uint32_t * ptr = (void*)0xFFFF00000000LL;
-    printk("mmu-test1: %d\n", *ptr);
+    volatile uint32_t * ptr = (void*)0x0;//0xFFFF00000000LL;
+    volatile uint32_t * ptr1 = (void*)0xFFFF000000000000LL;
+    printk("mmu-test1: %d\n", *ptr1);
     mmu_init();
-    printk("mmu-test2: %d\n", *ptr);
     vfs_init();
     gic_init();
     timer_init();
     gic_enable_interrupts();
     task_create();
+    printk("mmu-test2a: %d\n", *ptr);
+//    printk("mmu-test2: %d\n", *ptr1);
+//    printk("PAR_EL1 = %llx\n", read_par_el1());
+    asm("at s1e0r, %0" : : "r"(ptr));
+//    printk("PAR_EL1 = %llx\n", read_par_el1());
+
 
 }
 
