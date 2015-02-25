@@ -162,7 +162,7 @@ void mmu_init(void)
                 0 << 6 | // SH[1:0] - non shareable
                 1 << 4 | // AP[2:1] - rw priv, r user
                 0 << 3 | // NS - secure
-                0 << 0 | // AttrIndx - can be 0 as MAIR is set to 0 for all attributes
+                3 << 0 | // AttrIndx - can be 0 as MAIR is set to 0 for all attributes
                 0;
 
 
@@ -190,15 +190,21 @@ void mmu_init(void)
                 0  << 24  | // IRGN1- inner cacheability
                 0  << 23 | //EPD1
                 0  << 22 | // A1 - ttbr0 defines asid
-                24 << 16 | // T1SZ
+                24 << 16 | // T1SZ - 40 bit VA @ TTBR1
                 0  << 14 | // TG0, granularity - 4kb
                 0  << 12 | // SH0 - shareability
                 0  << 10 | // ORGN0 - outer cacheability
                 0  << 8  | // IRGN0- inner cacheability
                 0  << 7  | // EPD0
-                24 << 0  // T0SZ
+                24 << 0  // T0SZ - 40 bit VA @ TTBR0
                 );
-    write_mair_el1(0x0); // Memory attribute register - whole memory is device nGnRnE
+    // mair as in Linux:
+    // 0 - Dev nGnRnE
+    // 1 - Dev nGnRE
+    // 2 - Dev GRE
+    // 3 - Normal NC
+    // 4 - Normal
+    write_mair_el1(0xFF440C0400); // Memory attribute register
     dump_mmu();
     printk("start mmu\n");
     asm("dmb sy");

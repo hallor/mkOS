@@ -36,7 +36,7 @@ void init_kernel(void)
     page_init();
     kmalloc_init();
     volatile uint32_t * ptr = (void*)0x0;//0xFFFF00000000LL;
-    volatile uint32_t * ptr1 = (void*)0xFFFF000000000000LL;
+    volatile uint32_t * ptr1 = (void*)0xFFFFFF0000000000LL;
     printk("mmu-test1: %d\n", *ptr1);
     mmu_init();
     vfs_init();
@@ -45,7 +45,7 @@ void init_kernel(void)
     gic_enable_interrupts();
     task_create();
     printk("mmu-test2a: %d\n", *ptr);
-//    printk("mmu-test2: %d\n", *ptr1);
+    printk("mmu-test2: %d\n", *ptr1);
 //    printk("PAR_EL1 = %llx\n", read_par_el1());
     asm("at s1e0r, %0" : : "r"(ptr));
 //    printk("PAR_EL1 = %llx\n", read_par_el1());
